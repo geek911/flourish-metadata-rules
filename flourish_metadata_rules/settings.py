@@ -11,11 +11,14 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+SITE_ID = 40
+APP_NAME = 'flourish_metadata_rules'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
@@ -27,6 +30,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+ETC_DIR = '/etc/'
 
 # Application definition
 
@@ -37,6 +41,22 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'django_crypto_fields.apps.AppConfig',
+    'edc_action_item.apps.AppConfig',
+    'edc_device.apps.AppConfig',
+    'edc_appointment.apps.AppConfig',
+    'edc_protocol.apps.AppConfig',
+    'edc_timepoint.apps.AppConfig',
+    'edc_reference.apps.AppConfig',
+    'pre_flourish.apps.AppConfig',
+    'flourish_caregiver.apps.AppConfig',
+    'flourish_visit_schedule.apps.AppConfig',
+    'flourish_reference.apps.AppConfig',
+    'flourish_metadata_rules.apps.EdcVisitTrackingAppConfig',
+    'flourish_metadata_rules.apps.EdcMetadataAppConfig',
+    'flourish_metadata_rules.apps.EdcFacilityAppConfig',
+    'flourish_metadata_rules.apps.AppConfig',
 ]
 
 MIDDLEWARE = [
@@ -47,6 +67,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'edc_subject_dashboard.middleware.DashboardMiddleware',
 ]
 
 ROOT_URLCONF = 'flourish_metadata_rules.urls'
@@ -99,6 +120,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+DASHBOARD_URL_NAMES = {}
+
+COUNTRY = 'botswana'
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
@@ -118,3 +142,20 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+HOLIDAY_FILE = os.path.join(BASE_DIR, 'holidays.csv')
+
+if 'test' in sys.argv:
+
+    class DisableMigrations:
+
+        def __contains__(self, item):
+            return True
+
+        def __getitem__(self, item):
+            return None
+
+    MIGRATION_MODULES = DisableMigrations()
+    PASSWORD_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher',)
+    DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'
+
