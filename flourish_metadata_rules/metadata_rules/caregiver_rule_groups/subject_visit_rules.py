@@ -23,7 +23,7 @@ class  MaternalVisitRuleGroup(CrfRuleGroup):
         target_models=[f'{app_label}.hivviralloadandcd4',])
     
     hiv_no_prior = CrfRule(
-        predicate=pc.func_hiv_preg_no_prior_participation,
+        predicate=pc.func_pregnant_hiv,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.arvsprepregnancy',

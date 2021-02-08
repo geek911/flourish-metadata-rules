@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'edc_protocol.apps.AppConfig',
     'edc_timepoint.apps.AppConfig',
     'edc_reference.apps.AppConfig',
-    'pre_flourish.apps.AppConfig',
     'flourish_caregiver.apps.AppConfig',
     'flourish_visit_schedule.apps.AppConfig',
     'flourish_reference.apps.AppConfig',

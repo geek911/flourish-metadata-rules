@@ -18,9 +18,7 @@ if settings.APP_NAME == 'flourish_metadata_rules':
 
     class EdcVisitTrackingAppConfig(BaseEdcVisitTrackingAppConfig):
         visit_models = {
-            'flourish_caregiver': ('maternal_visit', 'flourish_caregiver.maternalvisit'),
-            'pre_flourish': (
-            'maternal_visit', 'pre_flourish.preflourishcaregivervisit'), }
+            'flourish_caregiver': ('maternal_visit', 'flourish_caregiver.maternalvisit'), }
 
     class EdcFacilityAppConfig(BaseEdcFacilityAppConfig):
         country = 'botswana'

@@ -7,8 +7,8 @@ from edc_facility.import_holidays import import_holidays
 from edc_reference import LongitudinalRefset
 from edc_reference.tests import ReferenceTestHelper
 
-from .models import MaternalDataset, AntenatalEnrollment
-from .models import HivRapidTestCounseling
+from .models import MaternalDataset, AntenatalEnrollment, CyhuuPreEnrollment
+from .models import HivRapidTestCounseling, MaternalVisit, Appointment
 from ..predicates import CaregiverPredicates
 
 class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
@@ -44,7 +44,6 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
             timepoint='3000M')
         import_holidays()
 
-    @tag('preg')
     def test_func_preg_no_prior_participation(self):
         pc = CaregiverPredicates()
         pc.app_label = self.app_label
@@ -61,20 +60,23 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
         self.assertTrue(
             pc.func_caregiver_no_prior_participation(self.maternal_visits[0],))
 
-#     def test_func_bio_mothers_hiv(self):
-#         pc = CaregiverPredicates()
-#         pc.app_label = self.app_label
-#         pc.pre_app_label = self.app_label
-#
-#         MaternalDataset.objects.create(subject_identifier=self.subject_identifier)
-#         CyhuuPreEnrollment.objects.create(maternal_visit=self.maternal_visits[0],
-#                                           subject_identifier=self.subject_identifier,
-#                                           biological_mother=YES)
-#         HivRapidTestCounseling.objects.create(subject_identifier=self.subject_identifier,
-#                                               result=POS)
-#
-#         self.assertTrue(
-#             pc.func_bio_mothers_hiv(self.maternal_visits[0],))
+    def test_func_bio_mothers_hiv(self):
+        pc = CaregiverPredicates()
+        pc.app_label = self.app_label
+        pc.pre_app_label = self.app_label
+
+        MaternalDataset.objects.create(subject_identifier=self.subject_identifier)
+        appointment = Appointment.objects.create(subject_identifier=self.subject_identifier)
+        maternal_visit = MaternalVisit.objects.create(appointment=appointment,
+                                                      subject_identifier=self.subject_identifier)
+        CyhuuPreEnrollment.objects.create(maternal_visit=maternal_visit,
+                                          biological_mother=YES)
+        HivRapidTestCounseling.objects.create(maternal_visit=maternal_visit,
+                                              subject_identifier=self.subject_identifier,
+                                              result=POS)
+
+        self.assertTrue(
+            pc.func_bio_mothers_hiv(self.maternal_visits[0],))
 
     def test_func_pregnant_hiv(self):
         pc = CaregiverPredicates()
@@ -82,7 +84,10 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
 
         MaternalDataset.objects.create(subject_identifier=self.subject_identifier)
         AntenatalEnrollment.objects.create(subject_identifier=self.subject_identifier)
-        HivRapidTestCounseling.objects.create(maternal_visit=self.maternal_visits[0],
+        appointment = Appointment.objects.create(subject_identifier=self.subject_identifier)
+        maternal_visit = MaternalVisit.objects.create(appointment=appointment,
+                                                      subject_identifier=self.subject_identifier)
+        HivRapidTestCounseling.objects.create(maternal_visit=maternal_visit,
                                               subject_identifier=self.subject_identifier,
                                               result=POS)
 

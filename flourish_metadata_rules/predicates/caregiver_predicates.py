@@ -80,8 +80,7 @@ class CaregiverPredicates(PredicateCollection):
             cyhuu_model = django_apps.get_model(f'{self.pre_app_label}.cyhuupreenrollment')
             
             try:
-                cyhuu_obj = cyhuu_model.objects.filter(
-                                    maternal_visit__appointment__subject_idenitifier=visit.subject_identifier)
+                cyhuu_obj = cyhuu_model.objects.get(maternal_visit__appointment__subject_identifier=visit.subject_identifier)
             except cyhuu_model.DoesNotExist:
                 return False
             else:
