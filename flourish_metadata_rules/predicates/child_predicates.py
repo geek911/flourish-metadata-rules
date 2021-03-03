@@ -8,7 +8,7 @@ class UrlMixinNoReverseMatch(Exception):
 
 
 class ChildPredicates(PredicateCollection):
-    
+
     app_label = 'flourish_child'
     pre_app_label = 'pre_flourish'
     maternal_app_label = 'flourish_caregiver'
@@ -41,37 +41,34 @@ class ChildPredicates(PredicateCollection):
             return None
         else:
             return age(assent_obj.dob, get_utcnow)
-    
+
     def func_7_years_older(self, visit=None, **kwargs):
         """Returns true if participant is 7 years or older
         """
         child_age = self.get_child_age():
         return child_age.years >= 7 if child_age else False
-        
+
     def func_12_years_older(self, visit=None, **kwargs):
         """Returns true if participant is 12 years or older
         """
         child_age = self.get_child_age():
         return child_age.years >= 12 if child_age else False
-    
+
     def func_12_years_older_female(self, visit=None, **kwargs):
         """Returns true if participant is 12 years or older
         """
-        child_dataset_model = django_apps.get_model(f'{self.app_label}.childdataset')
+        assent_model = django_apps.get_model(f'{self.app_label}.childassent')
         try:
-            child_dataset_obj = child_dataset_model.objects.get(subject_identifier=visit.subject_identifier)
-        except child_dataset_model.DoesNotExist:
-            return None
-        
-        child_age = self.get_child_age():
-        if child_age:
-            return child_age.years >= 12 and child_dataset_obj.infant_sex == FEMALE
-        return False
-    
+            assent_obj = assent_model.objects.get(subject_identifier=visit.subject_identifier)
+        except assent_model.DoesNotExist:
+            raise
+        else:
+            child_age = age(assent_obj.dob, get_utcnow)
+            return child_age.years >= 12 and assent_obj.gender == FEMALE
+
+
     def func_2_years_older(self, visit=None, **kwargs):
         """Returns true if participant is 2 months or older
         """
         child_age = self.get_child_age():
         return child_age.months >= 2 if child_age else False
-
-    
