@@ -26,7 +26,7 @@ class ChildPredicates(PredicateCollection):
             maternal_delivery_cls = django_apps.get_model(f'{self.maternal_app_label}.maternaldelivery')
             try:
                 maternal_delivery_obj = maternal_delivery_cls.objects.get(
-                                        subject_identifier=visit.subject_identifier)
+                                        subject_identifier=visit.subject_identifier[:-3])
             except maternal_delivery_cls.DoesNotExist:
                 return True
         return False
@@ -34,13 +34,44 @@ class ChildPredicates(PredicateCollection):
     def get_child_age(self, visit=None, **kwargs):
         """Returns child age
         """
-        assent_model = django_apps.get_model(f'{self.app_label}.childassent')
+        if not self.mother_pregnant():
+            assent_model = django_apps.get_model(f'{self.app_label}.childassent')
+            try:
+                assent_obj = assent_model.objects.get(subject_identifier=visit.subject_identifier)
+            except assent_model.DoesNotExist:
+                maternal_dataset_model = django_apps.get_model(f'{self.app_label}.maternaldataset')
+                try:
+                    maternal_dataset_obj = child_dataset_model.objects.get(subject_identifier=visit.subject_identifier[:-3])
+                except maternal_dataset_model.DoesNotExist:
+                    maternal_delivery_cls = django_apps.get_model(f'{self.maternal_app_label}.maternaldelivery')
+                    try:
+                        maternal_delivery_obj = maternal_delivery_cls.objects.get(
+                                                subject_identifier=visit.subject_identifier[:-3])
+                    except maternal_delivery_cls.DoesNotExist:
+                        return None
+                    else:
+                        return (maternal_delivery_obj.delivery_datetime, get_utcnow) 
+                else:
+                    age(maternal_dataset_model.delivdt, get_utcnow)
+            else:
+                return age(assent_obj.dob, get_utcnow)
+
+    def func_consent_study_pregnant(self, visit=None, **kwargs):
+        """Returns True if participant's mother consented to the study in pregnancy
+        """
+        maternal_delivery_cls = django_apps.get_model(f'{self.maternal_app_label}.maternaldelivery')
         try:
-            assent_obj = assent_model.objects.get(subject_identifier=visit.subject_identifier)
-        except assent_model.DoesNotExist:
-            return None
+            maternal_delivery_cls.objects.get(subject_identifier=visit.subject_identifier[:-3])
+        except maternal_delivery_cls.DoesNotExist:
+            return False
         else:
-            return age(assent_obj.dob, get_utcnow)
+            return True
+
+    def func_specimen_storage_consent(self, visit=None, **kwargs):
+        """Returns True if participant's mother consented to repository blood specimen 
+        storage at enrollment.
+        """
+        return False
 
     def func_7_years_older(self, visit=None, **kwargs):
         """Returns true if participant is 7 years or older
@@ -61,13 +92,13 @@ class ChildPredicates(PredicateCollection):
         try:
             assent_obj = assent_model.objects.get(subject_identifier=visit.subject_identifier)
         except assent_model.DoesNotExist:
-            raise
+            return False
         else:
             child_age = age(assent_obj.dob, get_utcnow)
             return child_age.years >= 12 and assent_obj.gender == FEMALE
 
 
-    def func_2_years_older(self, visit=None, **kwargs):
+    def func_2_months_older(self, visit=None, **kwargs):
         """Returns true if participant is 2 months or older
         """
         child_age = self.get_child_age():

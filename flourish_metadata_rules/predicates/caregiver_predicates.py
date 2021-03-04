@@ -4,7 +4,7 @@ from edc_metadata_rules import PredicateCollection
 from flourish_caregiver.helper_classes import Cohort
 
 class CaregiverPredicates(PredicateCollection):
-    
+
     app_label = 'flourish_caregiver'
     pre_app_label = 'pre_flourish'
     visit_model = f'{app_label}.maternalvisit'
@@ -12,7 +12,6 @@ class CaregiverPredicates(PredicateCollection):
     def hiv_status(self, visit=None):
 
         rapid_test_model = django_apps.get_model(f'{self.app_label}.hivrapidtestcounseling')
-
         try:
             rapid_test_obj = rapid_test_model.objects.get(maternal_visit__subject_identifier=visit.subject_identifier)
         except rapid_test_model.DoesNotExist:
