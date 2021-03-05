@@ -8,6 +8,22 @@ class MaternalDataset(BaseUuidModel):
 
     subject_identifier = models.CharField(max_length=25)
 
+    delivdt = models.DateField(null=True, blank=True)
+
+
+class ChildDataset(BaseUuidModel):
+
+    subject_identifier = models.CharField(max_length=25)
+
+
+class ChildAssent(BaseUuidModel):
+
+    subject_identifier = models.CharField(max_length=25)
+
+    dob = models.DateField(null=True, blank=True)
+
+    gender = models.CharField(max_length=1)
+
 
 class AntenatalEnrollment(BaseUuidModel):
 
@@ -23,8 +39,18 @@ class MaternalDelivery(BaseUuidModel):
 
     subject_identifier = models.CharField(max_length=25)
 
+    delivery_datetime = models.DateTimeField(null=True, blank=True)
+
 
 class MaternalVisit(BaseUuidModel):
+
+    appointment = models.ForeignKey(Appointment,
+                         on_delete=PROTECT)
+
+    subject_identifier = models.CharField(max_length=25)
+
+
+class ChildVisit(BaseUuidModel):
 
     appointment = models.ForeignKey(Appointment,
                          on_delete=PROTECT)
