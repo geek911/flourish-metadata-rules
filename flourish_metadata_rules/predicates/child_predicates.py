@@ -1,7 +1,7 @@
 from django.apps import apps as django_apps
-from edc_metadata_rules import PredicateCollection
 from edc_base.utils import age, get_utcnow
-from edc_constants.constants import FEMALE
+from edc_constants.constants import FEMALE, NO
+from edc_metadata_rules import PredicateCollection
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -18,16 +18,18 @@ class ChildPredicates(PredicateCollection):
     def mother_pregnant(self, visit=None, **kwargs):
         """Returns true if expecting
         """
-        enrollment_model = django_apps.get_model(f'{self.maternal_app_label}.antenatalenrollment')
+        enrollment_model = django_apps.get_model(
+            f'{self.maternal_app_label}.antenatalenrollment')
         try:
             enrollment_model.objects.get(subject_identifier=visit.subject_identifier[:-3])
         except enrollment_model.DoesNotExist:
             return False
         else:
-            maternal_delivery_cls = django_apps.get_model(f'{self.maternal_app_label}.maternaldelivery')
+            maternal_delivery_cls = django_apps.get_model(
+                f'{self.maternal_app_label}.maternaldelivery')
             try:
-                maternal_delivery_obj = maternal_delivery_cls.objects.get(
-                                        subject_identifier=visit.subject_identifier[:-3])
+                maternal_delivery_cls.objects.get(
+                    subject_identifier=visit.subject_identifier[:-3])
             except maternal_delivery_cls.DoesNotExist:
                 return True
         return False
@@ -38,20 +40,24 @@ class ChildPredicates(PredicateCollection):
         if not self.mother_pregnant(visit=visit):
             assent_model = django_apps.get_model(f'{self.app_label}.childassent')
             try:
-                assent_obj = assent_model.objects.get(subject_identifier=visit.subject_identifier)
+                assent_obj = assent_model.objects.get(
+                    subject_identifier=visit.subject_identifier)
             except assent_model.DoesNotExist:
-                maternal_dataset_model = django_apps.get_model(f'{self.app_label}.maternaldataset')
+                maternal_dataset_model = django_apps.get_model(
+                    f'{self.app_label}.maternaldataset')
                 try:
-                    maternal_dataset_obj = maternal_dataset_model.objects.get(subject_identifier=visit.subject_identifier[:-3])
+                    maternal_dataset_model.objects.get(
+                        subject_identifier=visit.subject_identifier[:-3])
                 except maternal_dataset_model.DoesNotExist:
-                    maternal_delivery_cls = django_apps.get_model(f'{self.maternal_app_label}.maternaldelivery')
+                    maternal_delivery_cls = django_apps.get_model
+                    (f'{self.maternal_app_label}.maternaldelivery')
                     try:
                         maternal_delivery_obj = maternal_delivery_cls.objects.get(
                                                 subject_identifier=visit.subject_identifier[:-3])
                     except maternal_delivery_cls.DoesNotExist:
                         return None
                     else:
-                        return age(maternal_delivery_obj.delivery_datetime, get_utcnow()) 
+                        return age(maternal_delivery_obj.delivery_datetime, get_utcnow())
                 else:
                     return age(maternal_dataset_model.delivdt, get_utcnow())
             else:
@@ -60,16 +66,18 @@ class ChildPredicates(PredicateCollection):
     def func_consent_study_pregnant(self, visit=None, **kwargs):
         """Returns True if participant's mother consented to the study in pregnancy
         """
-        maternal_delivery_cls = django_apps.get_model(f'{self.maternal_app_label}.maternaldelivery')
+        maternal_delivery_cls = django_apps.get_model(
+            f'{self.maternal_app_label}.maternaldelivery')
         try:
-            maternal_delivery_cls.objects.get(subject_identifier=visit.subject_identifier[:-3])
+            maternal_delivery_cls.objects.get(subject_identifier=visit.subject_identifier[:-3],
+                                              live_infants_to_register__gte=1)
         except maternal_delivery_cls.DoesNotExist:
             return False
         else:
             return True
 
     def func_specimen_storage_consent(self, visit=None, **kwargs):
-        """Returns True if participant's mother consented to repository blood specimen 
+        """Returns True if participant's mother consented to repository blood specimen
         storage at enrollment.
         """
         return False
