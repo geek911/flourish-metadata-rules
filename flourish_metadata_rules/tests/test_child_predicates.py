@@ -11,6 +11,7 @@ from .models import MaternalDelivery, Appointment
 from ..predicates import ChildPredicates
 
 
+@tag('cp')
 class TestChildPredicates(SiteTestCaseMixin, TestCase):
 
     reference_helper_cls = ReferenceTestHelper
@@ -53,7 +54,8 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
 
         MaternalDelivery.objects.create(
             subject_identifier=self.subject_identifier[:-3],
-            delivery_datetime=(get_utcnow() - relativedelta(months=5)))
+            delivery_datetime=(get_utcnow() - relativedelta(months=5)),
+            live_infants_to_register=1)
 
         self.assertTrue(
             self.pc.func_consent_study_pregnant(self.infant_visits[0],))
@@ -90,7 +92,8 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
     def test_func_2_months_older(self):
         MaternalDelivery.objects.create(
             subject_identifier=self.subject_identifier[:-3],
-            delivery_datetime=get_utcnow() - relativedelta(months=5))
+            delivery_datetime=get_utcnow() - relativedelta(months=5),
+            live_infants_to_register=1)
 
         self.assertTrue(
             self.pc.func_2_months_older(self.infant_visits[0],))

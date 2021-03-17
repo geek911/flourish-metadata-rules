@@ -41,11 +41,13 @@ class MaternalDelivery(BaseUuidModel):
 
     delivery_datetime = models.DateTimeField(null=True, blank=True)
 
+    live_infants_to_register = models.IntegerField()
+
 
 class MaternalVisit(BaseUuidModel):
 
     appointment = models.ForeignKey(Appointment,
-                         on_delete=PROTECT)
+                                    on_delete=PROTECT)
 
     subject_identifier = models.CharField(max_length=25)
 
@@ -74,5 +76,4 @@ class HivRapidTestCounseling(BaseUuidModel):
     subject_identifier = models.CharField(max_length=25)
 
     result = models.CharField(max_length=3)
-
 
