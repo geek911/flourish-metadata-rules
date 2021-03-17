@@ -2,7 +2,6 @@ from dateutil.relativedelta import relativedelta
 from django.test import TestCase, tag
 from edc_base.tests import SiteTestCaseMixin
 from edc_base.utils import get_utcnow
-from edc_constants.constants import YES, POS
 from edc_facility.import_holidays import import_holidays
 from edc_reference import LongitudinalRefset
 from edc_reference.tests import ReferenceTestHelper
@@ -10,6 +9,7 @@ from edc_reference.tests import ReferenceTestHelper
 from .models import MaternalDataset, AntenatalEnrollment, ChildAssent
 from .models import MaternalDelivery, Appointment
 from ..predicates import ChildPredicates
+
 
 class TestChildPredicates(SiteTestCaseMixin, TestCase):
 
@@ -51,8 +51,9 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
     def test_func_consent_study_pregnant(self):
         AntenatalEnrollment.objects.create(subject_identifier=self.subject_identifier[:-3])
 
-        MaternalDelivery.objects.create(subject_identifier=self.subject_identifier[:-3],
-                                        delivery_datetime=(get_utcnow() - relativedelta(months=5)))
+        MaternalDelivery.objects.create(
+            subject_identifier=self.subject_identifier[:-3],
+            delivery_datetime=(get_utcnow() - relativedelta(months=5)))
 
         self.assertTrue(
             self.pc.func_consent_study_pregnant(self.infant_visits[0],))
@@ -61,32 +62,35 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
         pass
 
     def test_func_7_years_older(self):
-        ChildAssent.objects.create(subject_identifier=self.subject_identifier,
-                                    dob=(get_utcnow() - relativedelta(years=8, months=5)).date(),
-                                    gender='M')
+        ChildAssent.objects.create(
+            subject_identifier=self.subject_identifier,
+            dob=(get_utcnow() - relativedelta(years=8, months=5)).date(),
+            gender='M')
 
         self.assertTrue(
             self.pc.func_7_years_older(self.infant_visits[0],))
 
     def test_func_12_years_older(self):
-        ChildAssent.objects.create(subject_identifier=self.subject_identifier,
-                                    dob=(get_utcnow() - relativedelta(years=13, months=5)).date(),
-                                    gender='M')
+        ChildAssent.objects.create(
+            subject_identifier=self.subject_identifier,
+            gender='M')
 
         self.assertTrue(
             self.pc.func_12_years_older(self.infant_visits[0],))
 
     def test_func_12_years_older_female(self):
-        ChildAssent.objects.create(subject_identifier=self.subject_identifier,
-                                    dob=(get_utcnow() - relativedelta(years=13, months=5)).date(),
-                                    gender='F')
+        ChildAssent.objects.create(
+            subject_identifier=self.subject_identifier,
+            dob=(get_utcnow() - relativedelta(years=13, months=5)).date(),
+            gender='F')
 
         self.assertTrue(
             self.pc.func_12_years_older_female(self.infant_visits[0],))
 
     def test_func_2_months_older(self):
-        MaternalDelivery.objects.create(subject_identifier=self.subject_identifier[:-3],
-                                    delivery_datetime=get_utcnow() - relativedelta(months=5))
+        MaternalDelivery.objects.create(
+            subject_identifier=self.subject_identifier[:-3],
+            delivery_datetime=get_utcnow() - relativedelta(months=5))
 
         self.assertTrue(
             self.pc.func_2_months_older(self.infant_visits[0],))
