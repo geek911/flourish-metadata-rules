@@ -5,15 +5,16 @@ from ...predicates import ChildPredicates
 app_label = 'flourish_child'
 pc = ChildPredicates()
 
+
 @register()
-class  ChildVisitRuleGroup(CrfRuleGroup):
+class ChildVisitRuleGroup(CrfRuleGroup):
 
     consent_study_pregnan = CrfRule(
         predicate=pc.func_consent_study_pregnant,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.childbirthscreening',
-                       f'{app_label}.infantarvexposure',])
+        target_models=[f'{app_label}.birth_data',
+                       f'{app_label}.infantarvexposure', ])
 
 #     older_than_7 = CrfRule(
 #         predicate=pc.func_7_years_older,

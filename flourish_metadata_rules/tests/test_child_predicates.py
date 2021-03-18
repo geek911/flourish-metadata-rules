@@ -6,8 +6,8 @@ from edc_facility.import_holidays import import_holidays
 from edc_reference import LongitudinalRefset
 from edc_reference.tests import ReferenceTestHelper
 
-from .models import MaternalDataset, AntenatalEnrollment, ChildAssent
-from .models import MaternalDelivery, Appointment
+from .models import AntenatalEnrollment, ChildAssent
+from .models import MaternalDelivery, ChildDummyConsent
 from ..predicates import ChildPredicates
 
 
@@ -69,6 +69,10 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
             dob=(get_utcnow() - relativedelta(years=8, months=5)).date(),
             gender='M')
 
+        ChildDummyConsent.objects.create(
+            subject_identifier=self.subject_identifier,
+            dob=(get_utcnow() - relativedelta(years=8, months=5)).date())
+
         self.assertTrue(
             self.pc.func_7_years_older(self.infant_visits[0],))
 
@@ -76,6 +80,10 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
         ChildAssent.objects.create(
             subject_identifier=self.subject_identifier,
             gender='M')
+
+        ChildDummyConsent.objects.create(
+            subject_identifier=self.subject_identifier,
+            dob=(get_utcnow() - relativedelta(years=12, months=5)).date())
 
         self.assertTrue(
             self.pc.func_12_years_older(self.infant_visits[0],))
@@ -86,6 +94,10 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
             dob=(get_utcnow() - relativedelta(years=13, months=5)).date(),
             gender='F')
 
+        ChildDummyConsent.objects.create(
+            subject_identifier=self.subject_identifier,
+            dob=(get_utcnow() - relativedelta(years=13, months=5)).date())
+
         self.assertTrue(
             self.pc.func_12_years_older_female(self.infant_visits[0],))
 
@@ -94,6 +106,10 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
             subject_identifier=self.subject_identifier[:-3],
             delivery_datetime=get_utcnow() - relativedelta(months=5),
             live_infants_to_register=1)
+
+        ChildDummyConsent.objects.create(
+            subject_identifier=self.subject_identifier,
+            dob=(get_utcnow() - relativedelta(months=5)).date())
 
         self.assertTrue(
             self.pc.func_2_months_older(self.infant_visits[0],))
