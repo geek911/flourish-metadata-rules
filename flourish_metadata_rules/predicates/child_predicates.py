@@ -38,7 +38,8 @@ class ChildPredicates(PredicateCollection):
         """Returns child age
         """
         if not self.mother_pregnant(visit=visit):
-            dummy_consent_cls = django_apps.get_model(f'{self.app_label}.childdummyconsent')
+            dummy_consent_cls = django_apps.get_model(
+                f'{self.app_label}.childdummysubjectconsent')
             try:
                 dummy_consent_obj = dummy_consent_cls.objects.get(
                     subject_identifier=visit.subject_identifier)

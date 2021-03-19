@@ -7,7 +7,7 @@ from edc_reference import LongitudinalRefset
 from edc_reference.tests import ReferenceTestHelper
 
 from .models import AntenatalEnrollment, ChildAssent
-from .models import MaternalDelivery, ChildDummyConsent
+from .models import MaternalDelivery, ChildDummySubjectConsent
 from ..predicates import ChildPredicates
 
 
@@ -69,7 +69,7 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
             dob=(get_utcnow() - relativedelta(years=8, months=5)).date(),
             gender='M')
 
-        ChildDummyConsent.objects.create(
+        ChildDummySubjectConsent.objects.create(
             subject_identifier=self.subject_identifier,
             dob=(get_utcnow() - relativedelta(years=8, months=5)).date())
 
@@ -81,7 +81,7 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
             subject_identifier=self.subject_identifier,
             gender='M')
 
-        ChildDummyConsent.objects.create(
+        ChildDummySubjectConsent.objects.create(
             subject_identifier=self.subject_identifier,
             dob=(get_utcnow() - relativedelta(years=12, months=5)).date())
 
@@ -94,7 +94,7 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
             dob=(get_utcnow() - relativedelta(years=13, months=5)).date(),
             gender='F')
 
-        ChildDummyConsent.objects.create(
+        ChildDummySubjectConsent.objects.create(
             subject_identifier=self.subject_identifier,
             dob=(get_utcnow() - relativedelta(years=13, months=5)).date())
 
@@ -107,7 +107,7 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
             delivery_datetime=get_utcnow() - relativedelta(months=5),
             live_infants_to_register=1)
 
-        ChildDummyConsent.objects.create(
+        ChildDummySubjectConsent.objects.create(
             subject_identifier=self.subject_identifier,
             dob=(get_utcnow() - relativedelta(months=5)).date())
 

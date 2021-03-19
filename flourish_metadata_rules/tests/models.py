@@ -24,7 +24,7 @@ class ChildAssent(BaseUuidModel):
     gender = models.CharField(max_length=1)
 
 
-class ChildDummyConsent(BaseUuidModel):
+class ChildDummySubjectConsent(BaseUuidModel):
 
     subject_identifier = models.CharField(max_length=25)
 
