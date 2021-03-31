@@ -1,4 +1,5 @@
 from django.apps import apps as django_apps
+from edc_base.utils import age, get_utcnow
 from edc_constants.constants import POS, YES
 from edc_metadata_rules import PredicateCollection
 from flourish_caregiver.helper_classes import MaternalStatusHelper
@@ -52,28 +53,48 @@ class CaregiverPredicates(PredicateCollection):
         """Returns true if participant is biological mother living with HIV.
         """
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
-            visit)
+            maternal_visit=visit)
 
         if self.pregnant(visit=visit):
             return maternal_status_helper.hiv_status(visit=visit) == POS
         else:
-            cyhuu_model = django_apps.get_model(f'{self.pre_app_label}.cyhuupreenrollment')
+            cyhuu_model_cls = django_apps.get_model(
+                f'{self.pre_app_label}.cyhuupreenrollment')
+
+            consent_model_cls = django_apps.get_model(
+                f'{self.app_label}.subjectconsent')
+
+            screening_prior_cls = django_apps.get_model(
+                f'{self.app_label}.screeningpriorbhpparticipants')
 
             try:
-                cyhuu_obj = cyhuu_model.objects.get(
-                    maternal_visit__appointment__subject_identifier=visit.subject_identifier)
-            except cyhuu_model.DoesNotExist:
+                consent_obj = consent_model_cls.objects.get(
+                    subject_identifier=visit.subject_identifier)
+            except consent_model_cls.DoesNotExist:
                 return False
             else:
-                return (cyhuu_obj.biological_mother == YES
-                        and maternal_status_helper.hiv_status(visit=visit) == POS)
+                try:
+                    screening_prior_obj = screening_prior_cls.objects.get(
+                        screening_identifier=consent_obj.screening_identifier)
+                except screening_prior_cls.DoesNotExist:
+                    try:
+                        cyhuu_obj = cyhuu_model_cls.objects.get(
+                            maternal_visit__appointment__subject_identifier=visit.subject_identifier)
+                    except cyhuu_model_cls.DoesNotExist:
+                        return False
+                    else:
+                        return (cyhuu_obj.biological_mother == YES
+                                and maternal_status_helper.hiv_status(visit=visit) == POS)
+                else:
+                    return (screening_prior_obj.flourish_participation == 'interested'
+                            and maternal_status_helper.hiv_status(visit=visit) == POS)
 
     def func_pregnant_hiv(self, visit=None,
                           maternal_status_helper=None, **kwargs):
         """Returns true if a newly enrolled participant is pregnant and living with HIV.
         """
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
-            visit)
+            maternal_visit=visit)
 
         return (self.pregnant(visit=visit)
                 and maternal_status_helper.hiv_status(visit=visit) == POS)
@@ -82,3 +103,26 @@ class CaregiverPredicates(PredicateCollection):
         """Returns true if non pregnant.
         """
         return not self.pregnant(visit=visit)
+
+    def func_newly_recruited(self, visit=None, **kwargs):
+        cyhuu_model_cls = django_apps.get_model(
+                f'{self.pre_app_label}.cyhuupreenrollment')
+        try:
+            cyhuu_model_cls.objects.get(
+                maternal_visit__appointment__subject_identifier=visit.subject_identifier)
+        except cyhuu_model_cls.DoesNotExist:
+            return False
+        else:
+            return True
+
+    def func_LWHIV_aged_10_15(self, visit=None, **kwargs):
+        consent_onbehalf_cls = django_apps.get_model(
+                f'{self.app_label}.caregiverchildconsent')
+        try:
+            consent_onbehalf_obj = consent_onbehalf_cls.objects.get(
+                subject_identifier=visit.subject_identifier)
+        except consent_onbehalf_cls.DoesNotExist:
+            return False
+        else:
+            return (age(consent_onbehalf_obj.child_dob, get_utcnow()).years >= 10
+                    and age(consent_onbehalf_obj.child_dob, get_utcnow()).months <= 180)

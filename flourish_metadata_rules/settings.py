@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'edc_protocol.apps.AppConfig',
     'edc_timepoint.apps.AppConfig',
     'edc_reference.apps.AppConfig',
+    'pre_flourish.apps.AppConfig',
     'flourish_caregiver.apps.AppConfig',
     'flourish_child.apps.AppConfig',
     'flourish_visit_schedule.apps.AppConfig',
@@ -90,7 +91,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'flourish_metadata_rules.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
@@ -100,7 +100,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -136,7 +135,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/

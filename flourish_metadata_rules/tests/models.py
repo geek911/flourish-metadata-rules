@@ -15,6 +15,16 @@ class ChildDataset(BaseUuidModel):
     subject_identifier = models.CharField(max_length=25)
 
 
+class ScreeningPriorBhpParticipants(BaseUuidModel):
+
+    screening_identifier = models.CharField(max_length=25)
+
+
+class SubjectConsent(BaseUuidModel):
+
+    subject_identifier = models.CharField(max_length=25)
+
+
 class ChildAssent(BaseUuidModel):
 
     subject_identifier = models.CharField(max_length=25)
@@ -64,6 +74,12 @@ class ChildVisit(BaseUuidModel):
                                     on_delete=PROTECT)
 
     subject_identifier = models.CharField(max_length=25)
+
+
+class CaregiverChildConsent(BaseUuidModel):
+    subject_identifier = models.CharField(max_length=25)
+
+    child_dob = models.DateField(null=True, blank=True)
 
 
 class CyhuuPreEnrollment(BaseUuidModel):
