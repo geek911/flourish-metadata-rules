@@ -48,15 +48,9 @@ class CaregiverPredicates(PredicateCollection):
         """
         return not self.pregnant(visit=visit) and not self.prior_participation(visit=visit)
 
-    def func_bio_mothers_hiv(self, visit=None,
-                             maternal_status_helper=None, **kwargs):
-        """Returns true if participant is biological mother living with HIV.
-        """
-        maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
-            maternal_visit=visit)
-
+    def func_bio_mother(self, visit=None, **kwargs):
         if self.pregnant(visit=visit):
-            return maternal_status_helper.hiv_status(visit=visit) == POS
+            return True
         else:
             cyhuu_model_cls = django_apps.get_model(
                 f'{self.pre_app_label}.cyhuupreenrollment')
@@ -83,11 +77,22 @@ class CaregiverPredicates(PredicateCollection):
                     except cyhuu_model_cls.DoesNotExist:
                         return False
                     else:
-                        return (cyhuu_obj.biological_mother == YES
-                                and maternal_status_helper.hiv_status(visit=visit) == POS)
+                        return cyhuu_obj.biological_mother == YES
                 else:
-                    return (screening_prior_obj.flourish_participation == 'interested'
-                            and maternal_status_helper.hiv_status(visit=visit) == POS)
+                    return screening_prior_obj.flourish_participation == 'interested'
+
+    def func_bio_mothers_hiv(self, visit=None,
+                             maternal_status_helper=None, **kwargs):
+        """Returns true if participant is biological mother living with HIV.
+        """
+        maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
+            maternal_visit=visit)
+
+        if self.pregnant(visit=visit):
+            return maternal_status_helper.hiv_status == POS
+        else:
+            return (self.func_bio_mother(visit=visit)
+                    and maternal_status_helper.hiv_status == POS)
 
     def func_pregnant_hiv(self, visit=None,
                           maternal_status_helper=None, **kwargs):
@@ -97,7 +102,7 @@ class CaregiverPredicates(PredicateCollection):
             maternal_visit=visit)
 
         return (self.pregnant(visit=visit)
-                and maternal_status_helper.hiv_status(visit=visit) == POS)
+                and maternal_status_helper.hiv_status == POS)
 
     def func_non_pregnant_caregivers(self, visit=None, **kwargs):
         """Returns true if non pregnant.
