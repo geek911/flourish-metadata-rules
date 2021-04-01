@@ -19,10 +19,14 @@ class ScreeningPriorBhpParticipants(BaseUuidModel):
 
     screening_identifier = models.CharField(max_length=25)
 
+    flourish_participation = models.CharField(max_length=25)
+
 
 class SubjectConsent(BaseUuidModel):
 
     subject_identifier = models.CharField(max_length=25)
+
+    screening_identifier = models.CharField(max_length=25)
 
 
 class ChildAssent(BaseUuidModel):

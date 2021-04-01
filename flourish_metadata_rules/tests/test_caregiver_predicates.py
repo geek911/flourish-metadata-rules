@@ -2,14 +2,17 @@ from dateutil.relativedelta import relativedelta
 from django.test import TestCase, tag
 from edc_base.tests import SiteTestCaseMixin
 from edc_base.utils import get_utcnow
-from edc_constants.constants import YES, POS
+from edc_constants.constants import YES, POS, NEG
 from edc_facility.import_holidays import import_holidays
 from edc_reference import LongitudinalRefset
 from edc_reference.tests import ReferenceTestHelper
 
-from .models import MaternalDataset, AntenatalEnrollment, CyhuuPreEnrollment
+from .models import MaternalDataset, AntenatalEnrollment, CyhuuPreEnrollment, SubjectConsent
 from .models import HivRapidTestCounseling, MaternalVisit, Appointment, CaregiverChildConsent
+from .models import ScreeningPriorBhpParticipants
 from ..predicates import CaregiverPredicates
+
+tag('mp')
 
 
 class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
@@ -30,6 +33,7 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
     def setUp(self):
 
         self.subject_identifier = '111111111'
+        self.screening_identifier = '12345'
         self.reference_helper = self.reference_helper_cls(
             visit_model=self.visit_model,
             subject_identifier=self.subject_identifier)
@@ -62,18 +66,42 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
         self.assertTrue(
             pc.func_caregiver_no_prior_participation(self.maternal_visits[0],))
 
-    def test_func_bio_mothers_hiv(self):
+    def test_func_bio_mothers(self):
         pc = CaregiverPredicates()
         pc.app_label = self.app_label
         pc.pre_app_label = self.app_label
 
         MaternalDataset.objects.create(subject_identifier=self.subject_identifier)
+        SubjectConsent.objects.create(subject_identifier=self.subject_identifier,
+                                      screening_identifier=self.screening_identifier)
         appointment = Appointment.objects.create(subject_identifier=self.subject_identifier)
         maternal_visit = MaternalVisit.objects.create(
             appointment=appointment,
             subject_identifier=self.subject_identifier)
         CyhuuPreEnrollment.objects.create(maternal_visit=maternal_visit,
                                           biological_mother=YES)
+        HivRapidTestCounseling.objects.create(maternal_visit=maternal_visit,
+                                              subject_identifier=self.subject_identifier,
+                                              result=NEG)
+
+        self.assertTrue(
+            pc.func_bio_mothers_hiv(self.maternal_visits[1],))
+
+    def test_func_bio_mothers_hiv(self):
+        pc = CaregiverPredicates()
+        pc.app_label = self.app_label
+        pc.pre_app_label = self.app_label
+
+        MaternalDataset.objects.create(subject_identifier=self.subject_identifier)
+        ScreeningPriorBhpParticipants.objects.create(
+            screening_identifier=self.screening_identifier,
+            flourish_participation='interested')
+        SubjectConsent.objects.create(subject_identifier=self.subject_identifier,
+                                      screening_identifier=self.screening_identifier)
+        appointment = Appointment.objects.create(subject_identifier=self.subject_identifier)
+        maternal_visit = MaternalVisit.objects.create(
+            appointment=appointment,
+            subject_identifier=self.subject_identifier)
         HivRapidTestCounseling.objects.create(maternal_visit=maternal_visit,
                                               subject_identifier=self.subject_identifier,
                                               result=POS)
