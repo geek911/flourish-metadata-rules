@@ -1,5 +1,5 @@
 from edc_metadata import NOT_REQUIRED, REQUIRED
-from edc_metadata_rules import CrfRule, CrfRuleGroup, P, register
+from edc_metadata_rules import CrfRule, CrfRuleGroup, register
 from ...predicates import ChildPredicates
 
 app_label = 'flourish_child'
@@ -37,4 +37,4 @@ class ChildVisitRuleGroup(CrfRuleGroup):
 
     class Meta:
         app_label = app_label
-        source_model = f'{app_label}.maternalvisit'
+        source_model = f'{app_label}.childvisit'
