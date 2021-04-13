@@ -38,15 +38,15 @@ class ChildPredicates(PredicateCollection):
         """Returns child age
         """
         if not self.mother_pregnant(visit=visit):
-            dummy_consent_cls = django_apps.get_model(
-                f'{self.app_label}.childdummysubjectconsent')
+            caregiver_child_consent_cls = django_apps.get_model(
+                f'{self.maternal_app_label}.caregiverchildconsent')
             try:
-                dummy_consent_obj = dummy_consent_cls.objects.get(
+                caregiver_child_consent = caregiver_child_consent_cls.objects.get(
                     subject_identifier=visit.subject_identifier)
-            except dummy_consent_cls.DoesNotExist:
+            except caregiver_child_consent_cls.DoesNotExist:
                 return None
             else:
-                return age(dummy_consent_obj.dob, get_utcnow())
+                return age(caregiver_child_consent.child_dob, get_utcnow())
 
     def func_consent_study_pregnant(self, visit=None, **kwargs):
         """Returns True if participant's mother consented to the study in pregnancy
