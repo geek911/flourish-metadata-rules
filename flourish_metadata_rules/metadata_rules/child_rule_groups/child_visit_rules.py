@@ -22,11 +22,11 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.childtannerstaging', ])
 
-#     female_older_12 = CrfRule(
-#         predicate=pc.func_12_years_older_female,
-#         consequence=REQUIRED,
-#         alternative=NOT_REQUIRED,
-#         target_models=[f'{app_label}.pregnancy'])
+    female_older_12 = CrfRule(
+        predicate=pc.func_12_years_older_female,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.childpregtesting'])
 
     older_than_12 = CrfRule(
         predicate=pc.func_12_years_older,
