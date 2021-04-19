@@ -120,7 +120,7 @@ class CaregiverPredicates(PredicateCollection):
         else:
             return True
 
-    def func_LWHIV_aged_10_15(self, visit=None, **kwargs):
+    def func_LWHIV_aged_10_17(self, visit=None, **kwargs):
         consent_onbehalf_cls = django_apps.get_model(
                 f'{self.app_label}.caregiverchildconsent')
         try:
@@ -130,4 +130,4 @@ class CaregiverPredicates(PredicateCollection):
             return False
         else:
             return (age(consent_onbehalf_obj.child_dob, get_utcnow()).years >= 10
-                    and age(consent_onbehalf_obj.child_dob, get_utcnow()).months <= 180)
+                    and age(consent_onbehalf_obj.child_dob, get_utcnow()).months <= 213)
