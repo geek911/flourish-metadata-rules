@@ -1,1 +1,3 @@
+from .child_gad_anxiety_screening_rules import ChildGAD7AnxietyScreeningRuleGroup
+from .child_phq_depression_screening_rules import ChildPHQ9DeprScreeningRuleGroup
 from .child_visit_rules import ChildVisitRuleGroup
