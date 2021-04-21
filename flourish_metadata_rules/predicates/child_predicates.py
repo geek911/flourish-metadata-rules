@@ -1,6 +1,6 @@
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
-from edc_constants.constants import FEMALE, NO
+from edc_constants.constants import FEMALE, YES
 from edc_metadata_rules import PredicateCollection
 
 
@@ -65,7 +65,15 @@ class ChildPredicates(PredicateCollection):
         """Returns True if participant's mother consented to repository blood specimen
         storage at enrollment.
         """
-        return False
+        child_assent_cls = django_apps.get_model(
+            f'{self.app_label}.childassent')
+        try:
+            child_assent_obj = child_assent_cls.objects.get(
+                subject_identifier=visit.subject_identifier)
+        except child_assent_cls.DoesNotExist:
+            return False
+        else:
+            return child_assent_obj.specimen_consent == YES
 
     def func_7_years_older(self, visit=None, **kwargs):
         """Returns true if participant is 7 years or older
@@ -96,3 +104,16 @@ class ChildPredicates(PredicateCollection):
         """
         child_age = self.get_child_age(visit=visit)
         return child_age.months >= 2 if child_age else False
+
+    # def func_continued_consent(self, visit=None, **kwargs):
+        # """Returns True if participant's is older than 18 years and has continued consent.
+        # """
+        # continued_consent_cls = django_apps.get_model(
+            # f'{self.app_label}.childcontinuedconsent')
+        # try:
+            # continued_consent_cls.objects.get(
+                # subject_identifier=visit.subject_identifier)
+        # except continued_consent_cls.DoesNotExist:
+            # return False
+        # else:
+            # return True

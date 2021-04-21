@@ -29,6 +29,12 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.obstericalhistory', ])
 
+    # specimen_storage = CrfRule(
+        # predicate=pc.func_specimen_storage_consent,
+        # consequence=REQUIRED,
+        # alternative=NOT_REQUIRED,
+        # target_models=[f'{app_label}.bloodspecimenstorage', ])
+
     hiv_no_prior = CrfRule(
         predicate=pc.func_pregnant_hiv,
         consequence=REQUIRED,
