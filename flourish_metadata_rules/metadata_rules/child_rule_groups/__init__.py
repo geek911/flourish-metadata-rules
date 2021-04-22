@@ -1,1 +1,2 @@
 from .child_visit_rules import ChildVisitRuleGroup
+from .socio_demographic_data_rules import ChildSocioDemographicRuleGroup
