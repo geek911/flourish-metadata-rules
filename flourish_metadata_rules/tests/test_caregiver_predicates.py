@@ -73,7 +73,8 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
 
         MaternalDataset.objects.create(subject_identifier=self.subject_identifier)
         SubjectConsent.objects.create(subject_identifier=self.subject_identifier,
-                                      screening_identifier=self.screening_identifier)
+                                      screening_identifier=self.screening_identifier,
+                                      biological_caregiver=YES)
         appointment = Appointment.objects.create(subject_identifier=self.subject_identifier)
         maternal_visit = MaternalVisit.objects.create(
             appointment=appointment,
@@ -97,7 +98,8 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
             screening_identifier=self.screening_identifier,
             flourish_participation='interested')
         SubjectConsent.objects.create(subject_identifier=self.subject_identifier,
-                                      screening_identifier=self.screening_identifier)
+                                      screening_identifier=self.screening_identifier,
+                                      biological_caregiver=YES)
         appointment = Appointment.objects.create(subject_identifier=self.subject_identifier)
         maternal_visit = MaternalVisit.objects.create(
             appointment=appointment,
@@ -149,7 +151,7 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
         self.assertTrue(
             pc.func_newly_recruited(self.maternal_visits[0],))
 
-    def test_func_LWHIV_aged_10_15(self):
+    def test_func_LWHIV_aged_10_17(self):
         pc = CaregiverPredicates()
         pc.app_label = self.app_label
         pc.pre_app_label = self.app_label
@@ -159,7 +161,7 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
             child_dob=get_utcnow() - relativedelta(years=12))
 
         self.assertTrue(
-            pc.func_LWHIV_aged_10_15(self.maternal_visits[0],))
+            pc.func_LWHIV_aged_10_17(self.maternal_visits[0],))
 
     @property
     def maternal_visits(self):

@@ -49,37 +49,12 @@ class CaregiverPredicates(PredicateCollection):
         return not self.pregnant(visit=visit) and not self.prior_participation(visit=visit)
 
     def func_bio_mother(self, visit=None, **kwargs):
-        if self.pregnant(visit=visit):
-            return True
-        else:
-            cyhuu_model_cls = django_apps.get_model(
-                f'{self.pre_app_label}.cyhuupreenrollment')
+        consent_cls = django_apps.get_model(f'{self.app_label}.subjectconsent')
 
-            consent_model_cls = django_apps.get_model(
-                f'{self.app_label}.subjectconsent')
+        consent_obj = consent_cls.objects.filter(
+                subject_identifier=visit.subject_identifier,).latest('created')
 
-            screening_prior_cls = django_apps.get_model(
-                f'{self.app_label}.screeningpriorbhpparticipants')
-
-            try:
-                consent_obj = consent_model_cls.objects.get(
-                    subject_identifier=visit.subject_identifier)
-            except consent_model_cls.DoesNotExist:
-                return False
-            else:
-                try:
-                    screening_prior_obj = screening_prior_cls.objects.get(
-                        screening_identifier=consent_obj.screening_identifier)
-                except screening_prior_cls.DoesNotExist:
-                    try:
-                        cyhuu_obj = cyhuu_model_cls.objects.get(
-                            maternal_visit__appointment__subject_identifier=visit.subject_identifier)
-                    except cyhuu_model_cls.DoesNotExist:
-                        return False
-                    else:
-                        return cyhuu_obj.biological_mother == YES
-                else:
-                    return screening_prior_obj.flourish_participation == 'interested'
+        return consent_obj.biological_caregiver == YES
 
     def func_bio_mothers_hiv(self, visit=None,
                              maternal_status_helper=None, **kwargs):
