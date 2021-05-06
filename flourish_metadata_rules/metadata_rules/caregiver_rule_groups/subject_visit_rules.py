@@ -27,7 +27,9 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         predicate=pc.func_bio_mother,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.obstericalhistory', ])
+        target_models=[f'{app_label}.obstericalhistory',
+                       f'{app_label}.caregiverclinicalmeasurements',
+                       f'{app_label}.medicalhistory', ])
 
     # specimen_storage = CrfRule(
         # predicate=pc.func_specimen_storage_consent,
