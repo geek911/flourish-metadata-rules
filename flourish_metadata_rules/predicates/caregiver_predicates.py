@@ -1,6 +1,5 @@
 from django.apps import apps as django_apps
-from django.db.models import Q
-from edc_base.utils import age, get_utcnow
+from edc_base.utils import get_utcnow
 from edc_constants.constants import POS, YES
 from edc_metadata_rules import PredicateCollection
 from flourish_caregiver.helper_classes import MaternalStatusHelper

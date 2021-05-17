@@ -1,5 +1,5 @@
 from edc_metadata import NOT_REQUIRED, REQUIRED
-from edc_metadata_rules import CrfRule, CrfRuleGroup, P, register
+from edc_metadata_rules import CrfRule, CrfRuleGroup, register
 from ...predicates import CaregiverPredicates
 
 app_label = 'flourish_caregiver'
