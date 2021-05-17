@@ -1,8 +1,10 @@
 from django.apps import apps as django_apps
+from django.db.models import Q
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import POS, YES
 from edc_metadata_rules import PredicateCollection
 from flourish_caregiver.helper_classes import MaternalStatusHelper
+from dateutil.relativedelta import relativedelta
 
 
 class CaregiverPredicates(PredicateCollection):
@@ -95,14 +97,11 @@ class CaregiverPredicates(PredicateCollection):
         else:
             return True
 
-    def func_LWHIV_aged_10_17(self, visit=None, **kwargs):
+    def func_LWHIV_aged_10_15(self, visit=None, **kwargs):
         consent_onbehalf_cls = django_apps.get_model(
                 f'{self.app_label}.caregiverchildconsent')
-        try:
-            consent_onbehalf_obj = consent_onbehalf_cls.objects.get(
-                subject_identifier=visit.subject_identifier)
-        except consent_onbehalf_cls.DoesNotExist:
-            return False
-        else:
-            return (age(consent_onbehalf_obj.child_dob, get_utcnow()).years >= 10
-                    and age(consent_onbehalf_obj.child_dob, get_utcnow()).months <= 213)
+        consent_onbehalf_objs = consent_onbehalf_cls.objects.filter(
+            child_dob__lte=get_utcnow().date() - relativedelta(years=10),
+            child_dob__gte=get_utcnow().date() - relativedelta(years=15, months=9),
+            subject_consent__subject_identifier=visit.subject_identifier)
+        return consent_onbehalf_objs

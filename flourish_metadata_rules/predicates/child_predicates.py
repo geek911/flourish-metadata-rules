@@ -65,15 +65,32 @@ class ChildPredicates(PredicateCollection):
         """Returns True if participant's mother consented to repository blood specimen
         storage at enrollment.
         """
-        child_assent_cls = django_apps.get_model(
-            f'{self.app_label}.childassent')
-        try:
-            child_assent_obj = child_assent_cls.objects.get(
-                subject_identifier=visit.subject_identifier)
-        except child_assent_cls.DoesNotExist:
-            return False
+
+        child_age = self.get_child_age(visit=visit)
+
+        consent_cls = None
+        subject_identifier = None
+
+        if child_age < 7:
+            consent_cls = django_apps.get_model(
+                f'{self.maternal_app_label}.caregiverchildconsent')
+            subject_identifier = visit.subject_ifdentifier[:-3]
+
+        elif child_age >= 18:
+            consent_cls = django_apps.get_model(f'{self.app_label}.childcontinuedconsent')
+            subject_identifier = visit.subject_ifdentifier
         else:
-            return child_assent_obj.specimen_consent == YES
+            consent_cls = django_apps.get_model(f'{self.app_label}.childassent')
+            subject_identifier = visit.subject_ifdentifier
+
+        if consent_cls and subject_identifier:
+            try:
+                consent_obj = consent_cls.objects.get(
+                    subject_identifier=subject_identifier)
+            except consent_cls.DoesNotExist:
+                return False
+            else:
+                return consent_obj.specimen_consent == YES
 
     def func_7_years_older(self, visit=None, **kwargs):
         """Returns true if participant is 7 years or older
@@ -104,16 +121,3 @@ class ChildPredicates(PredicateCollection):
         """
         child_age = self.get_child_age(visit=visit)
         return child_age.months >= 2 if child_age else False
-
-    # def func_continued_consent(self, visit=None, **kwargs):
-        # """Returns True if participant's is older than 18 years and has continued consent.
-        # """
-        # continued_consent_cls = django_apps.get_model(
-            # f'{self.app_label}.childcontinuedconsent')
-        # try:
-            # continued_consent_cls.objects.get(
-                # subject_identifier=visit.subject_identifier)
-        # except continued_consent_cls.DoesNotExist:
-            # return False
-        # else:
-            # return True

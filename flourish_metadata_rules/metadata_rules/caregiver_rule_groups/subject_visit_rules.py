@@ -50,8 +50,8 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.caregiverphqdeprscreening'])
 
-    LWHIV_10_17 = CrfRule(
-        predicate=pc.func_LWHIV_aged_10_17,
+    LWHIV_10_15 = CrfRule(
+        predicate=pc.func_LWHIV_aged_10_15,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.hivdisclosurestatus'])
