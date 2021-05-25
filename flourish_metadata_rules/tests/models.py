@@ -28,6 +28,8 @@ class SubjectConsent(BaseUuidModel):
 
     screening_identifier = models.CharField(max_length=25)
 
+    biological_caregiver = models.CharField(max_length=3)
+
 
 class ChildAssent(BaseUuidModel):
 

@@ -1,5 +1,5 @@
 from edc_metadata import NOT_REQUIRED, REQUIRED
-from edc_metadata_rules import CrfRule, CrfRuleGroup, P, register
+from edc_metadata_rules import CrfRule, CrfRuleGroup, register
 from ...predicates import CaregiverPredicates
 
 app_label = 'flourish_caregiver'
@@ -27,7 +27,9 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         predicate=pc.func_bio_mother,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.obstericalhistory', ])
+        target_models=[f'{app_label}.obstericalhistory',
+                       f'{app_label}.caregiverclinicalmeasurements',
+                       f'{app_label}.medicalhistory', ])
 
     # specimen_storage = CrfRule(
         # predicate=pc.func_specimen_storage_consent,
@@ -48,8 +50,8 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.caregiverphqdeprscreening'])
 
-    LWHIV_10_17 = CrfRule(
-        predicate=pc.func_LWHIV_aged_10_17,
+    LWHIV_10_15 = CrfRule(
+        predicate=pc.func_LWHIV_aged_10_15,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.hivdisclosurestatus'])
