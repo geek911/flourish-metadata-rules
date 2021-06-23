@@ -42,7 +42,10 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.arvsprepregnancy',
-                       f'{app_label}.maternalarvduringpreg'])
+                       f'{app_label}.maternalarvduringpreg',
+                       f'{app_label}.tbhistorypreg',
+                       f'{app_label}.tbscreenpreg',
+                       f'{app_label}.tbpresencehouseholdmembers', ])
 
     non_preg = CrfRule(
         predicate=pc.func_non_pregnant_caregivers,
