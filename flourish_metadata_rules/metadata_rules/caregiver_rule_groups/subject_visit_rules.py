@@ -15,7 +15,10 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.foodsecurityquestionnaire',
                        f'{app_label}.ultrasound',
-                       f'{app_label}.caregiveredinburghdeprscreening', ])
+                       f'{app_label}.caregiveredinburghdeprscreening',
+                       f'{app_label}.tbhistorypreg',
+                       f'{app_label}.tbscreenpreg',
+                       f'{app_label}.tbpresencehouseholdmembers'])
 
     biological_with_hiv = CrfRule(
         predicate=pc.func_bio_mothers_hiv,
@@ -43,9 +46,7 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.arvsprepregnancy',
                        f'{app_label}.maternalarvduringpreg',
-                       f'{app_label}.tbhistorypreg',
-                       f'{app_label}.tbscreenpreg',
-                       f'{app_label}.tbpresencehouseholdmembers', ])
+                       f'{app_label}.maternalhivinterimhx', ])
 
     non_preg = CrfRule(
         predicate=pc.func_non_pregnant_caregivers,
@@ -57,7 +58,7 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         predicate=pc.func_LWHIV_aged_10_15,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.hivdisclosurestatus'])
+        target_models=[f'{app_label}.hivdisclosurestatusa'])
 
     class Meta:
         app_label = app_label
