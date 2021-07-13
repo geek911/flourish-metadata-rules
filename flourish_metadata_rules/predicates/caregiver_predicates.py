@@ -64,11 +64,9 @@ class CaregiverPredicates(PredicateCollection):
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             maternal_visit=visit)
 
-        if self.pregnant(visit=visit):
-            return maternal_status_helper.hiv_status == POS
-        else:
-            return (self.func_bio_mother(visit=visit)
-                    and maternal_status_helper.hiv_status == POS)
+        return (not self.pregnant(visit=visit)
+                and (self.func_bio_mother(visit=visit)
+                and maternal_status_helper.hiv_status == POS))
 
     def func_pregnant_hiv(self, visit=None,
                           maternal_status_helper=None, **kwargs):
