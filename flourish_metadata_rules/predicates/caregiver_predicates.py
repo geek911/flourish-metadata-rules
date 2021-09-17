@@ -28,22 +28,32 @@ class CaregiverPredicates(PredicateCollection):
                 return True
         return False
 
+    def is_child_offstudy(self, child_subject_identifier):
+
+        offstudy_cls = django_apps.get_model('flourish_prn.childoffstudy')
+
+        try:
+            offstudy_cls.objects.get(subject_identifier=child_subject_identifier)
+        except offstudy_cls.DoesNotExist:
+            return False
+        else:
+            return True
+
     def child_gt10(self, visit):
 
         onschedule_model = django_apps.get_model(visit.appointment.schedule.onschedule_model)
         child_subject_identifier = None
 
         try:
-            onschedule_obj = onschedule_model.objects.get(
-                subject_identifier=visit.appointment.subject_identifier,
-                schedule_name=visit.appointment.schedule_name)
+            onschedule_obj = onschedule_model.objects.get(subject_identifier=visit.appointment.subject_identifier, schedule_name=visit.appointment.schedule_name)
         except onschedule_model.DoesNotExist:
             pass
         else:
+
             if 'antenatal' not in onschedule_obj.schedule_name:
                 child_subject_identifier = onschedule_obj.child_subject_identifier
 
-        if child_subject_identifier:
+        if child_subject_identifier and not self.is_child_offstudy(child_subject_identifier):
             registered_model = django_apps.get_model(f'edc_registration.registeredsubject')
 
             try:
@@ -53,8 +63,10 @@ class CaregiverPredicates(PredicateCollection):
                 raise
             else:
                 child_age = age(registered_child.dob, visit.report_datetime)
-                if((child_age.years <= 15 and child_age.months <= 9)
-                   and child_age.years >= 10):
+                child_age = float(f'{child_age.years}.{child_age.months}')
+
+                if(child_age <= 15.9 and child_age >= 10):
+
                     return [True, child_subject_identifier]
         return [False, child_subject_identifier]
 
@@ -91,6 +103,7 @@ class CaregiverPredicates(PredicateCollection):
                              maternal_status_helper=None, **kwargs):
         """Returns true if participant is biological mother living with HIV.
         """
+
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             maternal_visit=visit)
 
@@ -133,33 +146,31 @@ class CaregiverPredicates(PredicateCollection):
         else:
             return True
 
-    def func_LWHIV_aged_10_15a(self, visit=None, **kwargs):
+    def child_gt10_eligible(self, visit, maternal_status_helper, id_post_fix):
+
+        maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
+            maternal_visit=visit)
 
         gt_10, child_subject_identifier = self.child_gt10(visit)
 
         if child_subject_identifier:
-            first_child = (int(child_subject_identifier[-3:]) % 10 == 0 or
-                           child_subject_identifier[-3:] in ['-25', '-36'])
-            return gt_10 and first_child
+            child_exists = child_subject_identifier[-3:] in id_post_fix
 
-    def func_LWHIV_aged_10_15b(self, visit=None, **kwargs):
-        gt_10, child_subject_identifier = self.child_gt10(visit)
+            return maternal_status_helper.hiv_status == POS and gt_10 and child_exists
+        return False
 
-        if child_subject_identifier:
-            second_child = child_subject_identifier[-3:] == '-25'
-            return gt_10 and second_child
+    def func_LWHIV_aged_10_15a(self, visit=None, maternal_status_helper=None, **kwargs):
 
-    def func_LWHIV_aged_10_15c(self, visit=None, **kwargs):
-        gt_10, child_subject_identifier = self.child_gt10(visit)
+        return self.child_gt10_eligible(visit, maternal_status_helper,
+                                        ['-10', '-60', '-70', '-80', '-25', '-36'])
 
-        if child_subject_identifier:
-            third_child = child_subject_identifier[-3:] == '-36'
-            return gt_10 and third_child
+    def func_LWHIV_aged_10_15b(self, visit=None, maternal_status_helper=None, **kwargs):
 
-    # def func_LWHIV_aged_10_15d(self, visit=None, **kwargs):
-        # return self.onstudy_children_count_gt10(
-            # # child_identifier,
-                                                # visit=visit) == 4
+        return self.child_gt10_eligible(visit, maternal_status_helper, ['-25', ])
+
+    def func_LWHIV_aged_10_15c(self, visit=None, maternal_status_helper=None, **kwargs):
+
+        return self.child_gt10_eligible(visit, maternal_status_helper, ['-36', ])
 
     def func_show_hiv_test_form(
             self, visit=None, maternal_status_helper=None, **kwargs):
