@@ -1,10 +1,9 @@
 from django.apps import apps as django_apps
-from edc_base.utils import get_utcnow
+from edc_base.utils import age
 from edc_constants.constants import POS, YES, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
 from flourish_caregiver.helper_classes import MaternalStatusHelper
-from dateutil.relativedelta import relativedelta
 
 
 class CaregiverPredicates(PredicateCollection):
@@ -29,21 +28,47 @@ class CaregiverPredicates(PredicateCollection):
                 return True
         return False
 
-    def onstudy_children_count_gt10(self, visit):
+    def is_child_offstudy(self, child_subject_identifier):
 
-        registered_cls = django_apps.get_model(f'edc_registration.registeredsubject')
-        child_offstudy_cls = django_apps.get_model(f'flourish_prn.childoffstudy')
+        offstudy_cls = django_apps.get_model('flourish_prn.childoffstudy')
 
-        offstudy_child_ids = child_offstudy_cls.objects.filter(
-            subject_identifier__startswith=visit.subject_identifier)
+        try:
+            offstudy_cls.objects.get(subject_identifier=child_subject_identifier)
+        except offstudy_cls.DoesNotExist:
+            return False
+        else:
+            return True
 
-        registered_child_objs = registered_cls.objects.filter(
-            subject_identifier__startswith=visit.subject_identifier,
-            dob__lte=get_utcnow().date() - relativedelta(years=10),
-            dob__gte=get_utcnow().date() - relativedelta(years=15, months=9)).exclude(
-            subject_identifier__in=offstudy_child_ids)
+    def child_gt10(self, visit):
 
-        return registered_child_objs.count()
+        onschedule_model = django_apps.get_model(visit.appointment.schedule.onschedule_model)
+        child_subject_identifier = None
+
+        try:
+            onschedule_obj = onschedule_model.objects.get(subject_identifier=visit.appointment.subject_identifier, schedule_name=visit.appointment.schedule_name)
+        except onschedule_model.DoesNotExist:
+            pass
+        else:
+
+            if 'antenatal' not in onschedule_obj.schedule_name:
+                child_subject_identifier = onschedule_obj.child_subject_identifier
+
+        if child_subject_identifier and not self.is_child_offstudy(child_subject_identifier):
+            registered_model = django_apps.get_model(f'edc_registration.registeredsubject')
+
+            try:
+                registered_child = registered_model.objects.get(
+                    subject_identifier=child_subject_identifier)
+            except registered_model.DoesNotExist:
+                raise
+            else:
+                child_age = age(registered_child.dob, visit.report_datetime)
+                child_age = float(f'{child_age.years}.{child_age.months}')
+
+                if(child_age <= 15.9 and child_age >= 10):
+
+                    return [True, child_subject_identifier]
+        return [False, child_subject_identifier]
 
     def prior_participation(self, visit=None, **kwargs):
         maternal_dataset_model = django_apps.get_model(f'{self.app_label}.maternaldataset')
@@ -78,6 +103,7 @@ class CaregiverPredicates(PredicateCollection):
                              maternal_status_helper=None, **kwargs):
         """Returns true if participant is biological mother living with HIV.
         """
+
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             maternal_visit=visit)
 
@@ -120,19 +146,31 @@ class CaregiverPredicates(PredicateCollection):
         else:
             return True
 
-    def func_LWHIV_aged_10_15a(self, visit=None, **kwargs):
+    def child_gt10_eligible(self, visit, maternal_status_helper, id_post_fix):
 
-        return self.onstudy_children_count_gt10(visit=visit) >= 1
+        maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
+            maternal_visit=visit)
 
-    def func_LWHIV_aged_10_15b(self, visit=None, **kwargs):
-        return self.onstudy_children_count_gt10(visit=visit) >= 2
+        gt_10, child_subject_identifier = self.child_gt10(visit)
 
-    def func_LWHIV_aged_10_15c(self, visit=None, **kwargs):
+        if child_subject_identifier:
+            child_exists = child_subject_identifier[-3:] in id_post_fix
 
-        return self.onstudy_children_count_gt10(visit=visit) >= 3
+            return maternal_status_helper.hiv_status == POS and gt_10 and child_exists
+        return False
 
-    def func_LWHIV_aged_10_15d(self, visit=None, **kwargs):
-        return self.onstudy_children_count_gt10(visit=visit) == 4
+    def func_LWHIV_aged_10_15a(self, visit=None, maternal_status_helper=None, **kwargs):
+
+        return self.child_gt10_eligible(visit, maternal_status_helper,
+                                        ['-10', '-60', '-70', '-80', '-25', '-36'])
+
+    def func_LWHIV_aged_10_15b(self, visit=None, maternal_status_helper=None, **kwargs):
+
+        return self.child_gt10_eligible(visit, maternal_status_helper, ['-25', ])
+
+    def func_LWHIV_aged_10_15c(self, visit=None, maternal_status_helper=None, **kwargs):
+
+        return self.child_gt10_eligible(visit, maternal_status_helper, ['-36', ])
 
     def func_show_hiv_test_form(
             self, visit=None, maternal_status_helper=None, **kwargs):
