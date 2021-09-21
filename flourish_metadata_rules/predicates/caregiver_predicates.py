@@ -161,16 +161,39 @@ class CaregiverPredicates(PredicateCollection):
 
     def func_LWHIV_aged_10_15a(self, visit=None, maternal_status_helper=None, **kwargs):
 
-        return self.child_gt10_eligible(visit, maternal_status_helper,
-                                        ['-10', '-60', '-70', '-80', '-25', '-36'])
+        values = self.exists(
+            reference_name=f'{self.app_label}.hivdisclosurestatusa',
+            subject_identifier=visit.subject_identifier,
+            field_name='disclosed_status',
+            value=YES)
+
+        return len(values) == 0 and self.child_gt10_eligible(
+            visit, maternal_status_helper,
+            ['-10', '-60', '-70', '-80', '-25', '-36'])
 
     def func_LWHIV_aged_10_15b(self, visit=None, maternal_status_helper=None, **kwargs):
 
-        return self.child_gt10_eligible(visit, maternal_status_helper, ['-25', ])
+        values = self.exists(
+            reference_name=f'{self.app_label}.hivdisclosurestatusb',
+            subject_identifier=visit.subject_identifier,
+            field_name='disclosed_status',
+            value=YES)
+
+        return len(values) == 0 and self.child_gt10_eligible(visit,
+                                                             maternal_status_helper,
+                                                             ['-25', ])
 
     def func_LWHIV_aged_10_15c(self, visit=None, maternal_status_helper=None, **kwargs):
 
-        return self.child_gt10_eligible(visit, maternal_status_helper, ['-36', ])
+        values = self.exists(
+            reference_name=f'{self.app_label}.hivdisclosurestatusc',
+            subject_identifier=visit.subject_identifier,
+            field_name='disclosed_status',
+            value=YES)
+
+        return len(values) == 0 and self.child_gt10_eligible(visit,
+                                                             maternal_status_helper,
+                                                             ['-36', ])
 
     def func_show_hiv_test_form(
             self, visit=None, maternal_status_helper=None, **kwargs):
@@ -206,5 +229,6 @@ class CaregiverPredicates(PredicateCollection):
                         report_datetime=prev_rapid_test.report_datetime).fieldset(
                         field_name='result_date').all().values
 
-                    return (visit.report_datetime.date() - result_date[0]).days > 90
+                    return result_date and (
+                        visit.report_datetime.date() - result_date[0]).days > 90
         return False
