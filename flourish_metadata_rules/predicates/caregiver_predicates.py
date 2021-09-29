@@ -229,6 +229,6 @@ class CaregiverPredicates(PredicateCollection):
                         report_datetime=prev_rapid_test.report_datetime).fieldset(
                         field_name='result_date').all().values
 
-                    return result_date and (
+                    return len(result_date) != 0 and (
                         visit.report_datetime.date() - result_date[0]).days > 90
         return False
