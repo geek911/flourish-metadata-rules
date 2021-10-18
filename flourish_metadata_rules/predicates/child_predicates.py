@@ -121,3 +121,7 @@ class ChildPredicates(PredicateCollection):
         """
         child_age = self.get_child_age(visit=visit)
         return child_age.months >= 2 if child_age else False
+
+    def func_36_months_younger(self, visit=None, **kwargs):
+        child_age = self.get_child_age(visit=visit)
+        return ((child_age.years * 12) + child_age.months) < 36 if child_age else False
