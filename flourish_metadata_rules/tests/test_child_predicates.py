@@ -114,6 +114,15 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
         self.assertTrue(
             self.pc.func_2_months_older(self.infant_visits[0],))
 
+    def test_func_36_months_younger(self):
+
+        CaregiverChildConsent.objects.create(
+            subject_identifier=self.subject_identifier,
+            child_dob=(get_utcnow() - relativedelta(months=12)).date())
+
+        self.assertTrue(
+            self.pc.func_36_months_younger(self.infant_visits[0],))
+
     @property
     def infant_visits(self):
         return LongitudinalRefset(

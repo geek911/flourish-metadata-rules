@@ -48,6 +48,18 @@ class ChildPredicates(PredicateCollection):
             else:
                 return age(caregiver_child_consent.child_dob, get_utcnow())
 
+    def child_age_at_enrolment(self, visit):
+        if not self.mother_pregnant(visit=visit):
+            dummy_consent_cls = django_apps.get_model(
+                f'{self.app_label}.childdummysubjectconsent')
+            try:
+                dummy_consent = dummy_consent_cls.objects.get(
+                    subject_identifier=visit.subject_identifier)
+            except dummy_consent_cls.DoesNotExist:
+                return None
+            else:
+                return dummy_consent.age_at_consent
+
     def func_consent_study_pregnant(self, visit=None, **kwargs):
         """Returns True if participant's mother consented to the study in pregnancy
         """
@@ -121,3 +133,7 @@ class ChildPredicates(PredicateCollection):
         """
         child_age = self.get_child_age(visit=visit)
         return child_age.months >= 2 if child_age else False
+
+    def func_36_months_younger(self, visit=None, **kwargs):
+        child_age = self.child_age_at_enrolment(visit=visit)
+        return ((child_age.years * 12) + child_age.months) < 36 if child_age else False

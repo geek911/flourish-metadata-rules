@@ -10,13 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
 import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+DEFAULT_STUDY_SITE = 40
 SITE_ID = 40
 APP_NAME = 'flourish_metadata_rules'
 # Quick-start development settings - unsuitable for production
@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     'django_crypto_fields.apps.AppConfig',
     'edc_action_item.apps.AppConfig',
     'edc_device.apps.AppConfig',
+    'edc_odk.apps.AppConfig',
     'edc_appointment.apps.AppConfig',
+    'edc_lab.apps.AppConfig',
     'edc_protocol.apps.AppConfig',
     'edc_timepoint.apps.AppConfig',
     'edc_reference.apps.AppConfig',
