@@ -42,12 +42,6 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
                        f'{app_label}.caregiverclinicalmeasurements',
                        f'{app_label}.medicalhistory', ])
 
-    # specimen_storage = CrfRule(
-        # predicate=pc.func_specimen_storage_consent,
-        # consequence=REQUIRED,
-        # alternative=NOT_REQUIRED,
-        # target_models=[f'{app_label}.bloodspecimenstorage', ])
-
     hiv_no_prior = CrfRule(
         predicate=pc.func_pregnant_hiv,
         consequence=REQUIRED,
@@ -61,6 +55,12 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.caregiverphqdeprscreening'])
+
+    preg_women = CrfRule(
+        predicate=pc.func_non_pregnant_caregivers,
+        consequence=NOT_REQUIRED,
+        alternative=REQUIRED,
+        target_models=[f'{app_label}.substanceusepriorpregnancy'])
 
     LWHIV_10_15a = CrfRule(
         predicate=pc.func_LWHIV_aged_10_15a,
@@ -79,12 +79,6 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.hivdisclosurestatusc', ])
-
-    # LWHIV_10_15d = CrfRule(
-        # predicate=pc.func_LWHIV_aged_10_15d,
-        # consequence=REQUIRED,
-        # alternative=NOT_REQUIRED,
-        # target_models=[f'{app_label}.hivdisclosurestatusd', ])
 
     hiv_test = CrfRule(
         predicate=pc.func_show_hiv_test_form,
