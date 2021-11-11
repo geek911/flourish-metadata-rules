@@ -99,18 +99,20 @@ class CaregiverPredicates(PredicateCollection):
 
         return consent_obj.biological_caregiver == YES
 
-    def func_bio_mothers_hiv(self, visit=None,
-                             maternal_status_helper=None, **kwargs):
+    def func_bio_mothers_hiv_cohort_a(self, visit=None,
+                                      maternal_status_helper=None, **kwargs):
         """Returns true if participant is biological mother living with HIV.
         """
 
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             maternal_visit=visit)
 
-        return (self.func_bio_mother(visit=visit)
+        cohort_a = visit.schedule_name[:2] == 'a_'
+
+        return (cohort_a and self.func_bio_mother(visit=visit)
                 and maternal_status_helper.hiv_status == POS)
 
-    def func_bio_mothers_hiv_not_preg(self, visit=None,
+    def func_bio_mothers_hiv_not_preg_cohort_a(self, visit=None,
                                       maternal_status_helper=None, **kwargs):
         """Returns true if participant is biological mother living with HIV.
         """
@@ -118,7 +120,7 @@ class CaregiverPredicates(PredicateCollection):
             maternal_visit=visit)
 
         return (not self.pregnant(visit=visit)
-                and (self.func_bio_mothers_hiv(visit=visit)))
+                and (self.func_bio_mothers_hiv_cohort_a(visit=visit)))
 
     def func_pregnant_hiv(self, visit=None,
                           maternal_status_helper=None, **kwargs):
