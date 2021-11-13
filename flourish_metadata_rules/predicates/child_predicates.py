@@ -137,3 +137,15 @@ class ChildPredicates(PredicateCollection):
     def func_36_months_younger(self, visit=None, **kwargs):
         child_age = self.child_age_at_enrolment(visit=visit)
         return ((child_age.years * 12) + child_age.months) < 36 if child_age else False
+
+    def func_continued_consent(self, visit=None, **kwargs):
+        """Returns True if participant is over 18 and continued consent has been completed
+        """
+        continued_consent_cls = django_apps.get_model(
+            f'{self.app_label}.childcontinuedconsent')
+        try:
+            continued_consent_cls.objects.get(subject_identifier=visit.subject_identifier)
+        except continued_consent_cls.DoesNotExist:
+            return False
+        else:
+            return True

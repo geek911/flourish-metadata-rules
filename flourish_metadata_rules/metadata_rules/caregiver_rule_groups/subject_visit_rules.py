@@ -18,17 +18,17 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
                        f'{app_label}.caregiveredinburghdeprscreening',
                        f'{app_label}.tbhistorypreg',
                        f'{app_label}.tbscreenpreg',
-                       f'{app_label}.tbroutinehealthscreen',
-                       f'{app_label}.tbpresencehouseholdmembers'])
+                       f'{app_label}.tbpresencehouseholdmembers',
+                       f'{app_label}.substanceusepriorpregnancy'])
 
     biological_with_hiv_not_preg = CrfRule(
-        predicate=pc.func_bio_mothers_hiv_not_preg,
+        predicate=pc.func_bio_mothers_hiv_not_preg_cohort_a,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.hivviralloadandcd4', ])
 
     biological_with_hiv = CrfRule(
-        predicate=pc.func_bio_mothers_hiv,
+        predicate=pc.func_bio_mothers_hiv_cohort_a,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.maternaldiagnoses',
@@ -41,12 +41,6 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         target_models=[f'{app_label}.obstericalhistory',
                        f'{app_label}.caregiverclinicalmeasurements',
                        f'{app_label}.medicalhistory', ])
-
-    # specimen_storage = CrfRule(
-        # predicate=pc.func_specimen_storage_consent,
-        # consequence=REQUIRED,
-        # alternative=NOT_REQUIRED,
-        # target_models=[f'{app_label}.bloodspecimenstorage', ])
 
     hiv_no_prior = CrfRule(
         predicate=pc.func_pregnant_hiv,
@@ -79,12 +73,6 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.hivdisclosurestatusc', ])
-
-    # LWHIV_10_15d = CrfRule(
-        # predicate=pc.func_LWHIV_aged_10_15d,
-        # consequence=REQUIRED,
-        # alternative=NOT_REQUIRED,
-        # target_models=[f'{app_label}.hivdisclosurestatusd', ])
 
     hiv_test = CrfRule(
         predicate=pc.func_show_hiv_test_form,

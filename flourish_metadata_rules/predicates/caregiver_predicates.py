@@ -1,3 +1,5 @@
+import datetime
+
 from django.apps import apps as django_apps
 from edc_base.utils import age
 from edc_constants.constants import POS, YES, NEG
@@ -99,26 +101,28 @@ class CaregiverPredicates(PredicateCollection):
 
         return consent_obj.biological_caregiver == YES
 
-    def func_bio_mothers_hiv(self, visit=None,
-                             maternal_status_helper=None, **kwargs):
+    def func_bio_mothers_hiv_cohort_a(self, visit=None,
+                                      maternal_status_helper=None, **kwargs):
         """Returns true if participant is biological mother living with HIV.
         """
 
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             maternal_visit=visit)
 
-        return (self.func_bio_mother(visit=visit)
+        cohort_a = visit.schedule_name[:2] == 'a_'
+
+        return (cohort_a and self.func_bio_mother(visit=visit)
                 and maternal_status_helper.hiv_status == POS)
 
-    def func_bio_mothers_hiv_not_preg(self, visit=None,
-                                      maternal_status_helper=None, **kwargs):
+    def func_bio_mothers_hiv_not_preg_cohort_a(self, visit=None,
+                                               maternal_status_helper=None, **kwargs):
         """Returns true if participant is biological mother living with HIV.
         """
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             maternal_visit=visit)
 
         return (not self.pregnant(visit=visit)
-                and (self.func_bio_mothers_hiv(visit=visit)))
+                and (self.func_bio_mothers_hiv_cohort_a(visit=visit)))
 
     def func_pregnant_hiv(self, visit=None,
                           maternal_status_helper=None, **kwargs):
@@ -223,12 +227,7 @@ class CaregiverPredicates(PredicateCollection):
                                 report_datetime=prev_rapid_test.report_datetime,
                                 field_name='result_date')
 
-                    result_date = self.refsets(
-                        reference_name=f'{self.app_label}.hivrapidtestcounseling',
-                        subject_identifier=visit.subject_identifier,
-                        report_datetime=prev_rapid_test.report_datetime).fieldset(
-                        field_name='result_date').all().values
+                    if isinstance(result_date[0], datetime.date):
 
-                    return len(result_date) != 0 and (
-                        visit.report_datetime.date() - result_date[0]).days > 90
+                        return (visit.report_datetime.date() - result_date[0]).days > 90
         return False
