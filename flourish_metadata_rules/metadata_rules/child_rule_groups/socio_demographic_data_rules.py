@@ -8,11 +8,17 @@ app_label = 'flourish_child'
 @register()
 class ChildSocioDemographicRuleGroup(CrfRuleGroup):
 
-    gad_anxiety_referral = CrfRule(
+    attend_school = CrfRule(
         predicate=P('attend_school', 'eq', YES),
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.academicperformance'])
+
+    working_status = CrfRule(
+        predicate=P('working', 'eq', YES),
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.childworkingstatus'])
 
     class Meta:
         app_label = app_label
