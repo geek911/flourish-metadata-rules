@@ -19,7 +19,8 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
                        f'{app_label}.tbhistorypreg',
                        f'{app_label}.tbscreenpreg',
                        f'{app_label}.tbpresencehouseholdmembers',
-                       f'{app_label}.substanceusepriorpregnancy'])
+                       f'{app_label}.substanceusepriorpregnancy',
+                       f'{app_label}.tbroutinehealthscreen', ])
 
     biological_with_hiv_not_preg = CrfRule(
         predicate=pc.func_bio_mother_hiv,

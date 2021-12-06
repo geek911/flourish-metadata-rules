@@ -1,11 +1,11 @@
 import datetime
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 from django.apps import apps as django_apps
 from edc_base.utils import age
 from edc_constants.constants import POS, YES, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
+from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class CaregiverPredicates(PredicateCollection):
@@ -102,12 +102,12 @@ class CaregiverPredicates(PredicateCollection):
         return consent_obj.biological_caregiver == YES
 
     def func_bio_mother_hiv(self, visit=None, maternal_status_helper=None, **kwargs):
-        """Returns true if participant is biological mother living with HIV.
+        """Returns true if participant is non-pregnant biological mother living with HIV.
         """
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             maternal_visit=visit)
 
-        return (self.func_bio_mother(visit=visit)
+        return (self.func_bio_mother(visit=visit) and not self.pregnant(visit=visit)
                 and maternal_status_helper.hiv_status == POS)
 
     def func_bio_mothers_hiv_cohort_a(self, visit=None,
