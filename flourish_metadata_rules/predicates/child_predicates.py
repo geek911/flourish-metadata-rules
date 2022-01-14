@@ -50,7 +50,7 @@ class ChildPredicates(PredicateCollection):
 
     def child_age_at_enrolment(self, visit):
         if (not self.mother_pregnant(visit=visit)
-            and not self.func_consent_study_pregnant(visit)):
+                and not self.func_consent_study_pregnant(visit)):
             dummy_consent_cls = django_apps.get_model(
                 f'{self.app_label}.childdummysubjectconsent')
             try:
