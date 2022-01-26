@@ -49,8 +49,10 @@ class ChildPredicates(PredicateCollection):
                 return age(caregiver_child_consent.child_dob, get_utcnow())
 
     def child_age_at_enrolment(self, visit):
+
         if (not self.mother_pregnant(visit=visit)
-            and not self.func_consent_study_pregnant(visit)):
+                and not self.func_consent_study_pregnant(visit)):
+
             dummy_consent_cls = django_apps.get_model(
                 f'{self.app_label}.childdummysubjectconsent')
             try:
@@ -67,8 +69,9 @@ class ChildPredicates(PredicateCollection):
         maternal_delivery_cls = django_apps.get_model(
             f'{self.maternal_app_label}.maternaldelivery')
         try:
-            maternal_delivery_cls.objects.get(subject_identifier=visit.subject_identifier[:-3],
-                                              live_infants_to_register__gte=1)
+            maternal_delivery_cls.objects.get(
+                subject_identifier=visit.subject_identifier[:-3],
+                live_infants_to_register__gte=1)
         except maternal_delivery_cls.DoesNotExist:
             return False
         else:

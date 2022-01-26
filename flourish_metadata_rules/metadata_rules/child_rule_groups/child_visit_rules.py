@@ -41,6 +41,12 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.infantfeeding', ])
 
+    older_than_36months = CrfRule(
+        predicate=pc.func_36_months_younger,
+        consequence=NOT_REQUIRED,
+        alternative=REQUIRED,
+        target_models=[f'{app_label}.childfoodsecurityquestionnaire', ])
+
     continued_consent_ready = CrfRule(
         predicate=pc.func_continued_consent,
         consequence=REQUIRED,
