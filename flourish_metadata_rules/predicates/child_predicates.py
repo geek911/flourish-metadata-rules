@@ -1,6 +1,8 @@
+from flourish_caregiver.helper_classes import MaternalStatusHelper
+
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
-from edc_constants.constants import FEMALE, YES
+from edc_constants.constants import FEMALE, YES, POS
 from edc_metadata_rules import PredicateCollection
 
 
@@ -14,6 +16,25 @@ class ChildPredicates(PredicateCollection):
     pre_app_label = 'pre_flourish'
     maternal_app_label = 'flourish_caregiver'
     visit_model = f'{app_label}.childvisit'
+    maternal_visit_model = 'flourish_caregiver.maternalvisit'
+
+    @property
+    def maternal_visit_model_cls(self):
+        return django_apps.get_model(self.maternal_visit_model)
+
+    def get_latest_maternal_hiv_status(self, visit=None):
+        maternal_subject_id = visit.subject_identifier[:-3]
+        maternal_visit = self.maternal_visit_model_cls.objects.filter(
+            subject_identifier=maternal_subject_id)
+
+        if maternal_visit:
+            latest_visit = maternal_visit.latest('report_datetime')
+            maternal_status_helper = MaternalStatusHelper(
+                maternal_visit=latest_visit)
+        else:
+            maternal_status_helper = MaternalStatusHelper(
+                subject_identifier=maternal_subject_id)
+        return maternal_status_helper
 
     def mother_pregnant(self, visit=None, **kwargs):
         """Returns true if expecting
@@ -76,6 +97,13 @@ class ChildPredicates(PredicateCollection):
             return False
         else:
             return True
+
+    def func_mother_preg_pos(self, visit=None, **kwargs):
+        """ Returns True if participant's mother consented to the study in
+            pregnancy and latest hiv status is POS.
+        """
+        hiv_status = self.get_latest_maternal_hiv_status(visit=visit).hiv_status
+        return (self.func_consent_study_pregnant(visit=visit) and hiv_status == POS)
 
     def func_specimen_storage_consent(self, visit=None, **kwargs):
         """Returns True if participant's mother consented to repository blood specimen
