@@ -13,8 +13,13 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         predicate=pc.func_consent_study_pregnant,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.birthdata',
-                       f'{app_label}.infantarvexposure', ])
+        target_models=[f'{app_label}.birthdata', ])
+
+    mother_pregnant_pos = CrfRule(
+        predicate=pc.func_mother_preg_pos,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.infantarvexposure', ])
 
     older_than_7 = CrfRule(
         predicate=pc.func_7_years_older,
@@ -40,6 +45,12 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.infantfeeding', ])
+
+    older_than_36months = CrfRule(
+        predicate=pc.func_36_months_younger,
+        consequence=NOT_REQUIRED,
+        alternative=REQUIRED,
+        target_models=[f'{app_label}.childfoodsecurityquestionnaire', ])
 
     continued_consent_ready = CrfRule(
         predicate=pc.func_continued_consent,

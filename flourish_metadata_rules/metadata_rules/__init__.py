@@ -7,3 +7,4 @@ from .child_rule_groups import ChildGAD7AnxietyScreeningRuleGroup
 from .child_rule_groups import ChildPHQ9DeprScreeningRuleGroup
 from .child_rule_groups import ChildSocioDemographicRuleGroup
 from .child_rule_groups import ChildVisitRuleGroup
+from .child_rule_groups import CongenitalAnomaliesRuleGroup
