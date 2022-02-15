@@ -32,8 +32,7 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         predicate=pc.func_bio_mothers_hiv_cohort_a,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.maternaldiagnoses',
-                       f'{app_label}.maternalinterimidcc', ])
+        target_models=[f'{app_label}.maternalinterimidcc', ])
 
     biological_mother = CrfRule(
         predicate=pc.func_bio_mother,
@@ -47,7 +46,8 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         predicate=pc.func_pregnant_hiv,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.arvsprepregnancy',
+        target_models=[f'{app_label}.maternaldiagnoses',
+                       f'{app_label}.arvsprepregnancy',
                        f'{app_label}.maternalarvduringpreg',
                        f'{app_label}.maternalhivinterimhx', ])
 
