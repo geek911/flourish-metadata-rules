@@ -58,6 +58,42 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.childworkingstatus', ])
 
+    age_3_months_old = CrfRule(
+        predicate=pc.func_3_months_old,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.infantdevscreening3months', ])
+
+    age_6_months_old = CrfRule(
+        predicate=pc.func_6_months_old,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.infantdevscreening6months', ])
+
+    age_12_months_old = CrfRule(
+        predicate=pc.func_12_months_old,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.infantdevscreening12months', ])
+
+    age_18_months_old = CrfRule(
+        predicate=pc.func_18_months_old,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.infantdevscreening18months', ])
+
+    age_36_months_old = CrfRule(
+        predicate=pc.func_36_months_old,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.infantdevscreening36months', ])
+
+    age_60to72_months_old = CrfRule(
+        predicate=pc.func_5_to_6_years_old,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.infantdevscreening60to72months', ])
+
     class Meta:
         app_label = app_label
         source_model = f'{app_label}.childvisit'
