@@ -1,9 +1,9 @@
-from flourish_caregiver.helper_classes import MaternalStatusHelper
-
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES, POS
 from edc_metadata_rules import PredicateCollection
+
+from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -11,7 +11,6 @@ class UrlMixinNoReverseMatch(Exception):
 
 
 class ChildPredicates(PredicateCollection):
-
     app_label = 'flourish_child'
     pre_app_label = 'pre_flourish'
     maternal_app_label = 'flourish_caregiver'
@@ -62,6 +61,7 @@ class ChildPredicates(PredicateCollection):
             caregiver_child_consent_cls = django_apps.get_model(
                 f'{self.maternal_app_label}.caregiverchildconsent')
             try:
+
                 caregiver_child_consent = caregiver_child_consent_cls.objects.get(
                     subject_identifier=visit.subject_identifier)
             except caregiver_child_consent_cls.DoesNotExist:
@@ -103,7 +103,7 @@ class ChildPredicates(PredicateCollection):
             pregnancy and latest hiv status is POS.
         """
         hiv_status = self.get_latest_maternal_hiv_status(visit=visit).hiv_status
-        return (self.func_consent_study_pregnant(visit=visit) and hiv_status == POS)
+        return self.func_consent_study_pregnant(visit=visit) and hiv_status == POS
 
     def func_specimen_storage_consent(self, visit=None, **kwargs):
         """Returns True if participant's mother consented to repository blood specimen
@@ -153,7 +153,8 @@ class ChildPredicates(PredicateCollection):
         """
         assent_model = django_apps.get_model(f'{self.app_label}.childassent')
         try:
-            assent_obj = assent_model.objects.get(subject_identifier=visit.subject_identifier)
+            assent_obj = assent_model.objects.get(
+                subject_identifier=visit.subject_identifier)
         except assent_model.DoesNotExist:
             return False
         else:
@@ -181,3 +182,45 @@ class ChildPredicates(PredicateCollection):
             return False
         else:
             return True
+
+    def func_3_months_old(self, visit=None, **kwargs):
+        """
+        Returns True if the participant is 3 months old
+        """
+        child_age = self.get_child_age(visit=visit)
+        return child_age.months == 3 if child_age else False
+
+    def func_6_months_old(self, visit=None, **kwargs):
+        """
+        Returns True if the participant is 6 months old
+        """
+        child_age = self.get_child_age(visit=visit)
+        return child_age.months == 6 if child_age else False
+
+    def func_12_months_old(self, visit=None, **kwargs):
+        """
+        Returns True if the participant is 12 months old
+        """
+        child_age = self.get_child_age(visit=visit)
+        return child_age.years == 1 if child_age else False
+
+    def func_18_months_old(self, visit=None, **kwargs):
+        """
+        Returns True if the participant is 18 months old
+        """
+        child_age = self.get_child_age(visit=visit)
+        return child_age.months == 6 and child_age.years == 1 if child_age else False
+
+    def func_36_months_old(self, visit=None, **kwargs):
+        """
+        Returns True if the participant is 36 months old
+        """
+        child_age = self.get_child_age(visit=visit)
+        return child_age.years == 3 and child_age.months == 0 if child_age else False
+
+    def func_5_to_6_years_old(self, visit=None, **kwargs):
+        """
+        Returns True if the participant is between 5 and 6 years old
+        """
+        child_age = self.get_child_age(visit=visit)
+        return 5 <= child_age.years <= 6 if child_age else False

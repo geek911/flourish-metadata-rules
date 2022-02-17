@@ -7,7 +7,7 @@ from edc_reference import LongitudinalRefset
 from edc_reference.tests import ReferenceTestHelper
 
 from .models import AntenatalEnrollment, ChildAssent, CaregiverChildConsent
-from .models import MaternalDelivery, ChildDummySubjectConsent
+from .models import MaternalDelivery
 from ..predicates import ChildPredicates
 
 
@@ -122,6 +122,66 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
 
         self.assertTrue(
             self.pc.func_36_months_younger(self.infant_visits[0],))
+
+    @tag('childage')
+    def test_func_3_months_old(self):
+
+        CaregiverChildConsent.objects.create(
+            subject_identifier=self.subject_identifier,
+            child_dob=(get_utcnow() - relativedelta(months=3)).date())
+
+        self.assertTrue(
+            self.pc.func_3_months_old(self.infant_visits[0],))
+
+    @tag('childage')
+    def test_func_6_months_old(self):
+
+        CaregiverChildConsent.objects.create(
+            subject_identifier=self.subject_identifier,
+            child_dob=(get_utcnow() - relativedelta(months=6)).date())
+
+        self.assertTrue(
+            self.pc.func_6_months_old(self.infant_visits[0],))
+
+    @tag('childage')
+    def test_func_12_months_old(self):
+
+        CaregiverChildConsent.objects.create(
+            subject_identifier=self.subject_identifier,
+            child_dob=(get_utcnow() - relativedelta(years=1)).date())
+
+        self.assertTrue(
+            self.pc.func_12_months_old(self.infant_visits[0],))
+
+    @tag('childage')
+    def test_func_18_months_old(self):
+
+        CaregiverChildConsent.objects.create(
+            subject_identifier=self.subject_identifier,
+            child_dob=(get_utcnow() - relativedelta(months=18)).date())
+
+        self.assertTrue(
+            self.pc.func_18_months_old(self.infant_visits[0],))
+
+    @tag('childage')
+    def test_func_36_months_old(self):
+
+        CaregiverChildConsent.objects.create(
+            subject_identifier=self.subject_identifier,
+            child_dob=(get_utcnow() - relativedelta(months=36)).date())
+
+        self.assertTrue(
+            self.pc.func_36_months_old(self.infant_visits[0],))
+
+    @tag('childage')
+    def test_func_5_to_6_years_old(self):
+
+        CaregiverChildConsent.objects.create(
+            subject_identifier=self.subject_identifier,
+            child_dob=(get_utcnow() - relativedelta(years=5, months=0)).date())
+
+        self.assertTrue(
+            self.pc.func_5_to_6_years_old(self.infant_visits[1],))
 
     @property
     def infant_visits(self):
