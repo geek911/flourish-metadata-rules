@@ -14,6 +14,14 @@ class CaregiverPredicates(PredicateCollection):
     pre_app_label = 'pre_flourish'
     visit_model = f'{app_label}.maternalvisit'
 
+    def func_hiv_positive(self, visit=None, **kwargs):
+        """
+        Get HIV Status from the rapid test results
+        """
+        maternal_status_helper = MaternalStatusHelper(
+            maternal_visit=visit, subject_identifier=visit.subject_identifier)
+        return maternal_status_helper.hiv_status == POS
+
     def pregnant(self, visit=None, **kwargs):
         """Returns true if expecting
         """
