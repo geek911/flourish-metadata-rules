@@ -1,9 +1,11 @@
+from turtle import pd
 from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES, POS
 from edc_metadata_rules import PredicateCollection
+from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -21,6 +23,17 @@ class ChildPredicates(PredicateCollection):
     @property
     def maternal_visit_model_cls(self):
         return django_apps.get_model(self.maternal_visit_model)
+
+    def func_hiv_exposed(self, visit=None, **kwargs):
+        """
+        Get the pregnancy status of the mother, is positive it means
+        the child was exposed to HIV
+        """
+        child_subject_identifier = visit.subject_identifier
+        caregiver_subject_identifier = child_subject_identifier[0:16]
+        maternal_status_helper = MaternalStatusHelper(
+            subject_identifier=caregiver_subject_identifier)
+        return maternal_status_helper.hiv_status == POS
 
     def get_latest_maternal_hiv_status(self, visit=None):
         maternal_subject_id = visit.subject_identifier[:-3]
@@ -42,7 +55,8 @@ class ChildPredicates(PredicateCollection):
         enrollment_model = django_apps.get_model(
             f'{self.maternal_app_label}.antenatalenrollment')
         try:
-            enrollment_model.objects.get(subject_identifier=visit.subject_identifier[:-3])
+            enrollment_model.objects.get(
+                subject_identifier=visit.subject_identifier[:-3])
         except enrollment_model.DoesNotExist:
             return False
         else:
@@ -102,7 +116,8 @@ class ChildPredicates(PredicateCollection):
         """ Returns True if participant's mother consented to the study in
             pregnancy and latest hiv status is POS.
         """
-        hiv_status = self.get_latest_maternal_hiv_status(visit=visit).hiv_status
+        hiv_status = self.get_latest_maternal_hiv_status(
+            visit=visit).hiv_status
         return (self.func_consent_study_pregnant(visit=visit) and hiv_status == POS)
 
     def func_specimen_storage_consent(self, visit=None, **kwargs):
@@ -121,10 +136,12 @@ class ChildPredicates(PredicateCollection):
             subject_identifier = visit.subject_ifdentifier[:-3]
 
         elif child_age >= 18:
-            consent_cls = django_apps.get_model(f'{self.app_label}.childcontinuedconsent')
+            consent_cls = django_apps.get_model(
+                f'{self.app_label}.childcontinuedconsent')
             subject_identifier = visit.subject_ifdentifier
         else:
-            consent_cls = django_apps.get_model(f'{self.app_label}.childassent')
+            consent_cls = django_apps.get_model(
+                f'{self.app_label}.childassent')
             subject_identifier = visit.subject_ifdentifier
 
         if consent_cls and subject_identifier:
@@ -153,7 +170,8 @@ class ChildPredicates(PredicateCollection):
         """
         assent_model = django_apps.get_model(f'{self.app_label}.childassent')
         try:
-            assent_obj = assent_model.objects.get(subject_identifier=visit.subject_identifier)
+            assent_obj = assent_model.objects.get(
+                subject_identifier=visit.subject_identifier)
         except assent_model.DoesNotExist:
             return False
         else:
@@ -176,7 +194,8 @@ class ChildPredicates(PredicateCollection):
         continued_consent_cls = django_apps.get_model(
             f'{self.app_label}.childcontinuedconsent')
         try:
-            continued_consent_cls.objects.get(subject_identifier=visit.subject_identifier)
+            continued_consent_cls.objects.get(
+                subject_identifier=visit.subject_identifier)
         except continued_consent_cls.DoesNotExist:
             return False
         else:
