@@ -16,7 +16,7 @@ class MaternalVisitReqRuleGroup(RequisitionRuleGroup):
         predicate=pc.func_hiv_positive,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_panels=[viral_load_panel, cd4_panel])
+        target_panels=[viral_load_panel, ])
 
     class Meta:
         app_label = app_label
