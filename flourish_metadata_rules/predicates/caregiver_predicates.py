@@ -1,11 +1,11 @@
 import datetime
+from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 from django.apps import apps as django_apps
 from edc_base.utils import age
 from edc_constants.constants import POS, YES, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class CaregiverPredicates(PredicateCollection):

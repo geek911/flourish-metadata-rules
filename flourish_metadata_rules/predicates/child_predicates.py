@@ -13,7 +13,6 @@ class UrlMixinNoReverseMatch(Exception):
 
 
 class ChildPredicates(PredicateCollection):
-
     app_label = 'flourish_child'
     pre_app_label = 'pre_flourish'
     maternal_app_label = 'flourish_caregiver'
@@ -75,12 +74,11 @@ class ChildPredicates(PredicateCollection):
         if not self.mother_pregnant(visit=visit):
             caregiver_child_consent_cls = django_apps.get_model(
                 f'{self.maternal_app_label}.caregiverchildconsent')
-            try:
-                caregiver_child_consent = caregiver_child_consent_cls.objects.get(
-                    subject_identifier=visit.subject_identifier)
-            except caregiver_child_consent_cls.DoesNotExist:
-                return None
-            else:
+            consents = caregiver_child_consent_cls.objects.filter(
+                subject_identifier=visit.subject_identifier)
+
+            if consents:
+                caregiver_child_consent = consents.latest('consent_datetime')
                 return age(caregiver_child_consent.child_dob, get_utcnow())
 
     def child_age_at_enrolment(self, visit):
@@ -90,12 +88,11 @@ class ChildPredicates(PredicateCollection):
 
             dummy_consent_cls = django_apps.get_model(
                 f'{self.app_label}.childdummysubjectconsent')
-            try:
-                dummy_consent = dummy_consent_cls.objects.get(
-                    subject_identifier=visit.subject_identifier)
-            except dummy_consent_cls.DoesNotExist:
-                return None
-            else:
+
+            dummy_consents = dummy_consent_cls.objects.filter(
+                subject_identifier=visit.subject_identifier)
+            if dummy_consents:
+                dummy_consent = dummy_consents.latest('consent_datetime')
                 return dummy_consent.age_at_consent
 
     def func_consent_study_pregnant(self, visit=None, **kwargs):
@@ -145,13 +142,13 @@ class ChildPredicates(PredicateCollection):
             subject_identifier = visit.subject_ifdentifier
 
         if consent_cls and subject_identifier:
-            try:
-                consent_obj = consent_cls.objects.get(
-                    subject_identifier=subject_identifier)
-            except consent_cls.DoesNotExist:
-                return False
-            else:
+            consent_objs = consent_cls.objects.filter(
+                subject_identifier=subject_identifier)
+
+            if consent_objs:
+                consent_obj = consent_objs.latest('consent_datetime')
                 return consent_obj.specimen_consent == YES
+            return False
 
     def func_7_years_older(self, visit=None, **kwargs):
         """Returns true if participant is 7 years or older
@@ -169,12 +166,14 @@ class ChildPredicates(PredicateCollection):
         """Returns true if participant is 12 years or older
         """
         assent_model = django_apps.get_model(f'{self.app_label}.childassent')
-        try:
-            assent_obj = assent_model.objects.get(
-                subject_identifier=visit.subject_identifier)
-        except assent_model.DoesNotExist:
-            return False
-        else:
+
+
+        assent_objs = assent_model.objects.filter(
+            subject_identifier=visit.subject_identifier)
+
+        if assent_objs:
+            assent_obj = assent_objs.latest('consent_datetime')
+
             child_age = age(assent_obj.dob, get_utcnow())
             return child_age.years >= 12 and assent_obj.gender == FEMALE
 
@@ -193,10 +192,52 @@ class ChildPredicates(PredicateCollection):
         """
         continued_consent_cls = django_apps.get_model(
             f'{self.app_label}.childcontinuedconsent')
-        try:
-            continued_consent_cls.objects.get(
-                subject_identifier=visit.subject_identifier)
-        except continued_consent_cls.DoesNotExist:
-            return False
-        else:
+
+        continued_consent_objs = continued_consent_cls.objects.filter(
+            subject_identifier=visit.subject_identifier)
+
+        if continued_consent_objs:
             return True
+        return False
+
+    def func_3_months_old(self, visit=None, **kwargs):
+        """
+        Returns True if the participant is 3 months old
+        """
+        child_age = self.get_child_age(visit=visit)
+        return child_age.months == 3 if child_age else False
+
+    def func_6_months_old(self, visit=None, **kwargs):
+        """
+        Returns True if the participant is 6 months old
+        """
+        child_age = self.get_child_age(visit=visit)
+        return child_age.months == 6 if child_age else False
+
+    def func_12_months_old(self, visit=None, **kwargs):
+        """
+        Returns True if the participant is 12 months old
+        """
+        child_age = self.get_child_age(visit=visit)
+        return child_age.years == 1 if child_age else False
+
+    def func_18_months_old(self, visit=None, **kwargs):
+        """
+        Returns True if the participant is 18 months old
+        """
+        child_age = self.get_child_age(visit=visit)
+        return child_age.months == 6 and child_age.years == 1 if child_age else False
+
+    def func_36_months_old(self, visit=None, **kwargs):
+        """
+        Returns True if the participant is 36 months old
+        """
+        child_age = self.get_child_age(visit=visit)
+        return child_age.years == 3 and child_age.months == 0 if child_age else False
+
+    def func_5_to_6_years_old(self, visit=None, **kwargs):
+        """
+        Returns True if the participant is between 5 and 6 years old
+        """
+        child_age = self.get_child_age(visit=visit)
+        return 5 <= child_age.years <= 6 if child_age else False

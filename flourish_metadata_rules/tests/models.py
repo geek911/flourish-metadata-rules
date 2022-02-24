@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.deletion import PROTECT
 from edc_base.model_mixins import BaseUuidModel
+from edc_base.utils import get_utcnow
 
 
 class MaternalDataset(BaseUuidModel):
@@ -24,6 +25,9 @@ class ScreeningPriorBhpParticipants(BaseUuidModel):
 
 class SubjectConsent(BaseUuidModel):
 
+    consent_datetime = models.DateTimeField(
+        default=get_utcnow)
+
     subject_identifier = models.CharField(max_length=25)
 
     screening_identifier = models.CharField(max_length=25)
@@ -33,6 +37,9 @@ class SubjectConsent(BaseUuidModel):
 
 class ChildAssent(BaseUuidModel):
 
+    consent_datetime = models.DateTimeField(
+        default=get_utcnow)
+
     subject_identifier = models.CharField(max_length=25)
 
     dob = models.DateField(null=True, blank=True)
@@ -41,6 +48,9 @@ class ChildAssent(BaseUuidModel):
 
 
 class ChildDummySubjectConsent(BaseUuidModel):
+
+    consent_datetime = models.DateTimeField(
+        default=get_utcnow)
 
     subject_identifier = models.CharField(max_length=25)
 
@@ -83,6 +93,10 @@ class ChildVisit(BaseUuidModel):
 
 
 class CaregiverChildConsent(BaseUuidModel):
+
+    consent_datetime = models.DateTimeField(
+        default=get_utcnow)
+
     subject_identifier = models.CharField(max_length=25)
 
     child_dob = models.DateField(null=True, blank=True)
