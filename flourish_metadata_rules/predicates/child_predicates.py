@@ -1,9 +1,9 @@
+from flourish_caregiver.helper_classes import MaternalStatusHelper
+
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES, POS
 from edc_metadata_rules import PredicateCollection
-
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -60,13 +60,11 @@ class ChildPredicates(PredicateCollection):
         if not self.mother_pregnant(visit=visit):
             caregiver_child_consent_cls = django_apps.get_model(
                 f'{self.maternal_app_label}.caregiverchildconsent')
-            try:
+            consents = caregiver_child_consent_cls.objects.filter(
+                subject_identifier=visit.subject_identifier)
 
-                caregiver_child_consent = caregiver_child_consent_cls.objects.get(
-                    subject_identifier=visit.subject_identifier)
-            except caregiver_child_consent_cls.DoesNotExist:
-                return None
-            else:
+            if consents:
+                caregiver_child_consent = consents.latest('consent_datetime')
                 return age(caregiver_child_consent.child_dob, get_utcnow())
 
     def child_age_at_enrolment(self, visit):
@@ -76,12 +74,11 @@ class ChildPredicates(PredicateCollection):
 
             dummy_consent_cls = django_apps.get_model(
                 f'{self.app_label}.childdummysubjectconsent')
-            try:
-                dummy_consent = dummy_consent_cls.objects.get(
-                    subject_identifier=visit.subject_identifier)
-            except dummy_consent_cls.DoesNotExist:
-                return None
-            else:
+
+            dummy_consents = dummy_consent_cls.objects.filter(
+                subject_identifier=visit.subject_identifier)
+            if dummy_consents:
+                dummy_consent = dummy_consents.latest('consent_datetime')
                 return dummy_consent.age_at_consent
 
     def func_consent_study_pregnant(self, visit=None, **kwargs):
@@ -128,13 +125,13 @@ class ChildPredicates(PredicateCollection):
             subject_identifier = visit.subject_ifdentifier
 
         if consent_cls and subject_identifier:
-            try:
-                consent_obj = consent_cls.objects.get(
-                    subject_identifier=subject_identifier)
-            except consent_cls.DoesNotExist:
-                return False
-            else:
+            consent_objs = consent_cls.objects.filter(
+                subject_identifier=subject_identifier)
+
+            if consent_objs:
+                consent_obj = consent_objs.latest('consent_datetime')
                 return consent_obj.specimen_consent == YES
+            return False
 
     def func_7_years_older(self, visit=None, **kwargs):
         """Returns true if participant is 7 years or older
@@ -152,12 +149,13 @@ class ChildPredicates(PredicateCollection):
         """Returns true if participant is 12 years or older
         """
         assent_model = django_apps.get_model(f'{self.app_label}.childassent')
-        try:
-            assent_obj = assent_model.objects.get(
-                subject_identifier=visit.subject_identifier)
-        except assent_model.DoesNotExist:
-            return False
-        else:
+
+        assent_objs = assent_model.objects.filter(
+            subject_identifier=visit.subject_identifier)
+
+        if assent_objs:
+            assent_obj = assent_objs.latest('consent_datetime')
+
             child_age = age(assent_obj.dob, get_utcnow())
             return child_age.years >= 12 and assent_obj.gender == FEMALE
 
@@ -176,12 +174,13 @@ class ChildPredicates(PredicateCollection):
         """
         continued_consent_cls = django_apps.get_model(
             f'{self.app_label}.childcontinuedconsent')
-        try:
-            continued_consent_cls.objects.get(subject_identifier=visit.subject_identifier)
-        except continued_consent_cls.DoesNotExist:
-            return False
-        else:
+
+        continued_consent_objs = continued_consent_cls.objects.filter(
+            subject_identifier=visit.subject_identifier)
+
+        if continued_consent_objs:
             return True
+        return False
 
     def func_3_months_old(self, visit=None, **kwargs):
         """

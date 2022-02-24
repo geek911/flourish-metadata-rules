@@ -7,10 +7,10 @@ from edc_facility.import_holidays import import_holidays
 from edc_reference import LongitudinalRefset
 from edc_reference.tests import ReferenceTestHelper
 
-from .models import MaternalDataset, AntenatalEnrollment, CyhuuPreEnrollment, SubjectConsent
-from .models import HivRapidTestCounseling, MaternalVisit, Appointment, CaregiverChildConsent
-from .models import ScreeningPriorBhpParticipants
 from ..predicates import CaregiverPredicates
+from .models import HivRapidTestCounseling, MaternalVisit, Appointment, CaregiverChildConsent
+from .models import MaternalDataset, AntenatalEnrollment, CyhuuPreEnrollment, SubjectConsent
+from .models import ScreeningPriorBhpParticipants
 
 tag('mp')
 
@@ -86,7 +86,7 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
                                               result=NEG)
 
         self.assertTrue(
-            pc.func_bio_mothers_hiv(self.maternal_visits[1],))
+            pc.func_bio_mothers_hiv_cohort_a(self.maternal_visits[1],))
 
     def test_func_bio_mothers_hiv(self):
         pc = CaregiverPredicates()
@@ -109,7 +109,7 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
                                               result=POS)
 
         self.assertTrue(
-            pc.func_bio_mothers_hiv(self.maternal_visits[1],))
+            pc.func_bio_mothers_hiv_cohort_a(self.maternal_visits[1],))
 
     def test_func_pregnant_hiv(self):
         pc = CaregiverPredicates()
@@ -151,7 +151,7 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
         self.assertTrue(
             pc.func_newly_recruited(self.maternal_visits[0],))
 
-    def test_func_LWHIV_aged_10_17(self):
+    def test_func_LWHIV_aged_10_15a(self):
         pc = CaregiverPredicates()
         pc.app_label = self.app_label
         pc.pre_app_label = self.app_label
@@ -161,7 +161,7 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
             child_dob=get_utcnow() - relativedelta(years=12))
 
         self.assertTrue(
-            pc.func_LWHIV_aged_10_17(self.maternal_visits[0],))
+            pc.func_LWHIV_aged_10_15a(self.maternal_visits[0],))
 
     @property
     def maternal_visits(self):
