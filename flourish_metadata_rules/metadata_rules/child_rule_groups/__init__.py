@@ -3,3 +3,4 @@ from .child_phq_depression_screening_rules import ChildPHQ9DeprScreeningRuleGrou
 from .child_visit_rules import ChildVisitRuleGroup
 from .socio_demographic_data_rules import ChildSocioDemographicRuleGroup
 from .child_conginetal_anomalies_rules import CongenitalAnomaliesRuleGroup
+from .requisition_rules import ChildVisitReqRuleGroup

@@ -8,3 +8,4 @@ from .child_rule_groups import ChildPHQ9DeprScreeningRuleGroup
 from .child_rule_groups import ChildSocioDemographicRuleGroup
 from .child_rule_groups import ChildVisitRuleGroup
 from .child_rule_groups import CongenitalAnomaliesRuleGroup
+from .child_rule_groups import ChildVisitReqRuleGroup
