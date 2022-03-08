@@ -1,4 +1,3 @@
-from turtle import pd
 from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 from django.apps import apps as django_apps
