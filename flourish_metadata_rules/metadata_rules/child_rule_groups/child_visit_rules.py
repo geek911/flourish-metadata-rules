@@ -100,6 +100,12 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.infantdevscreening72months', ])
 
+    forth_eighth_quarter = CrfRule(
+        predicate=pc.func_forth_eighth_quarter,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.childfoodsecurityquestionnaire', ])
+
     class Meta:
         app_label = app_label
         source_model = f'{app_label}.childvisit'

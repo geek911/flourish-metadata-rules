@@ -334,3 +334,9 @@ class ChildPredicates(PredicateCollection):
                 return True
             else:
                 return False
+
+    def func_forth_eighth_quarter(self, visit=None, **kwargs):
+        """
+        Returns true if the visit is the 4th or 8th annual quarterly call
+        """
+        return visit.visit_code == '2004' or visit.visit_code == '2008' if visit.visit_code else False
