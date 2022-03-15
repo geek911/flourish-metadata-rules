@@ -1,9 +1,8 @@
-from flourish_caregiver.helper_classes import MaternalStatusHelper
-
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES, POS
 from edc_metadata_rules import PredicateCollection
+
 from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
@@ -17,10 +16,45 @@ class ChildPredicates(PredicateCollection):
     maternal_app_label = 'flourish_caregiver'
     visit_model = f'{app_label}.childvisit'
     maternal_visit_model = 'flourish_caregiver.maternalvisit'
+    infant_dev_screening_36_months = f'{app_label}.infantdevscreening36months'
+    infant_dev_screening_3_months = f'{app_label}.infantdevscreening3months'
+    infant_dev_screening_6_months = f'{app_label}.infantdevscreening6months'
+    infant_dev_screening_12_months = f'{app_label}.infantdevscreening12months'
+    infant_dev_screening_18_months = f'{app_label}.infantdevscreening18months'
+    infant_dev_screening_60_months = f'{app_label}.infantdevscreening60months'
+    infant_dev_screening_72_months = f'{app_label}.infantdevscreening72months'
 
     @property
     def maternal_visit_model_cls(self):
         return django_apps.get_model(self.maternal_visit_model)
+
+    @property
+    def infant_dev_screening_36_months_cls(self):
+        return django_apps.get_model(self.infant_dev_screening_36_months)
+
+    @property
+    def infant_dev_screening_3_months_cls(self):
+        return django_apps.get_model(self.infant_dev_screening_3_months)
+
+    @property
+    def infant_dev_screening_6_months_cls(self):
+        return django_apps.get_model(self.infant_dev_screening_6_months)
+
+    @property
+    def infant_dev_screening_12_months_cls(self):
+        return django_apps.get_model(self.infant_dev_screening_12_months)
+
+    @property
+    def infant_dev_screening_18_months_cls(self):
+        return django_apps.get_model(self.infant_dev_screening_18_months)
+
+    @property
+    def infant_dev_screening_60_months_cls(self):
+        return django_apps.get_model(self.infant_dev_screening_60_months)
+
+    @property
+    def infant_dev_screening_72_months_cls(self):
+        return django_apps.get_model(self.infant_dev_screening_72_months)
 
     def func_hiv_exposed(self, visit=None, **kwargs):
         """
@@ -53,8 +87,7 @@ class ChildPredicates(PredicateCollection):
         enrollment_model = django_apps.get_model(
             f'{self.maternal_app_label}.antenatalenrollment')
         try:
-            enrollment_model.objects.get(
-                subject_identifier=visit.subject_identifier[:-3])
+            enrollment_model.objects.get(subject_identifier=visit.subject_identifier[:-3])
         except enrollment_model.DoesNotExist:
             return False
         else:
@@ -75,7 +108,6 @@ class ChildPredicates(PredicateCollection):
                 f'{self.maternal_app_label}.caregiverchildconsent')
             consents = caregiver_child_consent_cls.objects.filter(
                 subject_identifier=visit.subject_identifier)
-
             if consents:
                 caregiver_child_consent = consents.latest('consent_datetime')
                 return age(caregiver_child_consent.child_dob, get_utcnow())
@@ -166,7 +198,6 @@ class ChildPredicates(PredicateCollection):
         """
         assent_model = django_apps.get_model(f'{self.app_label}.childassent')
 
-
         assent_objs = assent_model.objects.filter(
             subject_identifier=visit.subject_identifier)
 
@@ -204,39 +235,102 @@ class ChildPredicates(PredicateCollection):
         Returns True if the participant is 3 months old
         """
         child_age = self.get_child_age(visit=visit)
-        return child_age.months == 3 if child_age else False
+        if child_age.months == 3 and child_age.years == 0:
+            try:
+                previous_instance = self.infant_dev_screening_3_months_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier
+                    )
+            except self.infant_dev_screening_3_months_cls.DoesNotExist:
+                return True
+            else:
+                return False
 
     def func_6_months_old(self, visit=None, **kwargs):
         """
         Returns True if the participant is 6 months old
         """
         child_age = self.get_child_age(visit=visit)
-        return child_age.months == 6 if child_age else False
+        if child_age.years == 0 and child_age.months == 6:
+            try:
+                previous_instance = self.infant_dev_screening_6_months_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier
+                    )
+            except self.infant_dev_screening_6_months_cls.DoesNotExist:
+                return True
+            else:
+                return False
 
     def func_12_months_old(self, visit=None, **kwargs):
         """
         Returns True if the participant is 12 months old
         """
         child_age = self.get_child_age(visit=visit)
-        return child_age.years == 1 if child_age else False
+        if child_age.years == 1:
+            try:
+                previous_instance = self.infant_dev_screening_12_months_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier
+                    )
+            except self.infant_dev_screening_12_months_cls.DoesNotExist:
+                return True
+            else:
+                return False
 
     def func_18_months_old(self, visit=None, **kwargs):
         """
         Returns True if the participant is 18 months old
         """
         child_age = self.get_child_age(visit=visit)
-        return child_age.months == 6 and child_age.years == 1 if child_age else False
+        if child_age.years == 1 and child_age.months == 6:
+            try:
+                previous_instance = self.infant_dev_screening_18_months_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier
+                    )
+            except self.infant_dev_screening_18_months_cls.DoesNotExist:
+                return True
+            else:
+                return False
 
     def func_36_months_old(self, visit=None, **kwargs):
         """
         Returns True if the participant is 36 months old
         """
         child_age = self.get_child_age(visit=visit)
-        return child_age.years == 3 and child_age.months == 0 if child_age else False
+        if child_age.years == 3:
+            try:
+                previous_instance = self.infant_dev_screening_36_months_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier
+                    )
+            except self.infant_dev_screening_36_months_cls.DoesNotExist:
+                return True
+            else:
+                return False
 
-    def func_5_to_6_years_old(self, visit=None, **kwargs):
+    def func_60_months_old(self, visit=None, **kwargs):
         """
-        Returns True if the participant is between 5 and 6 years old
+        Returns True if the participant is 5 years old
         """
         child_age = self.get_child_age(visit=visit)
-        return 5 <= child_age.years <= 6 if child_age else False
+        if child_age.years == 5:
+            try:
+                previous_instance = self.infant_dev_screening_60_months_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier
+                    )
+            except self.infant_dev_screening_60_months_cls.DoesNotExist:
+                return True
+            else:
+                return False
+
+    def func_72_months_old(self, visit=None, **kwargs):
+        """
+        Returns True if the participant is 6 years old
+        """
+        child_age = self.get_child_age(visit=visit)
+        if child_age.years == 6:
+            try:
+                previous_instance = self.infant_dev_screening_72_months_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier
+                    )
+            except self.infant_dev_screening_72_months_cls.DoesNotExist:
+                return True
+            else:
+                return False
