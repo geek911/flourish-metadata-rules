@@ -1,9 +1,8 @@
+from flourish_caregiver.helper_classes import MaternalStatusHelper
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES, POS
 from edc_metadata_rules import PredicateCollection
-
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -215,6 +214,7 @@ class ChildPredicates(PredicateCollection):
 
     def func_36_months_younger(self, visit=None, **kwargs):
         child_age = self.child_age_at_enrolment(visit=visit)
+
         return ((child_age.years * 12) + child_age.months) < 36 if child_age else False
 
     def func_continued_consent(self, visit=None, **kwargs):
