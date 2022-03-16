@@ -6,9 +6,9 @@ from edc_facility.import_holidays import import_holidays
 from edc_reference import LongitudinalRefset
 from edc_reference.tests import ReferenceTestHelper
 
-from ..predicates import ChildPredicates
 from .models import AntenatalEnrollment, ChildAssent, CaregiverChildConsent
 from .models import MaternalDelivery, ChildDummySubjectConsent
+from ..predicates import ChildPredicates
 
 
 @tag('cp')
@@ -57,7 +57,7 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
             live_infants_to_register=1)
 
         self.assertTrue(
-            self.pc.func_consent_study_pregnant(self.infant_visits[0],))
+            self.pc.func_consent_study_pregnant(self.infant_visits[0], ))
 
     def test_func_specimen_storage_consent(self):
         pass
@@ -73,7 +73,7 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
             child_dob=(get_utcnow() - relativedelta(years=8, months=5)).date())
 
         self.assertTrue(
-            self.pc.func_7_years_older(self.infant_visits[0],))
+            self.pc.func_7_years_older(self.infant_visits[0], ))
 
     def test_func_12_years_older(self):
         ChildAssent.objects.create(
@@ -85,7 +85,7 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
             child_dob=(get_utcnow() - relativedelta(years=12, months=5)).date())
 
         self.assertTrue(
-            self.pc.func_12_years_older(self.infant_visits[0],))
+            self.pc.func_12_years_older(self.infant_visits[0], ))
 
     def test_func_12_years_older_female(self):
         ChildAssent.objects.create(
@@ -98,7 +98,7 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
             dob=(get_utcnow() - relativedelta(years=13, months=5)).date())
 
         self.assertTrue(
-            self.pc.func_12_years_older_female(self.infant_visits[0],))
+            self.pc.func_12_years_older_female(self.infant_visits[0], ))
 
     def test_func_2_months_older(self):
         MaternalDelivery.objects.create(
@@ -111,26 +111,16 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
             child_dob=(get_utcnow() - relativedelta(months=5)).date())
 
         self.assertTrue(
-            self.pc.func_2_months_older(self.infant_visits[0],))
+            self.pc.func_2_months_older(self.infant_visits[0], ))
 
     @tag('t1')
     def test_func_36_months_younger(self):
-
         ChildDummySubjectConsent.objects.create(
             subject_identifier=self.subject_identifier,
             dob=(get_utcnow() - relativedelta(months=12)).date())
 
         self.assertTrue(
-            self.pc.func_36_months_younger(self.infant_visits[0],))
-
-    @tag('childage')
-    def test_func_6_years_old(self):
-        CaregiverChildConsent.objects.create(
-            subject_identifier=self.subject_identifier,
-            child_dob=(get_utcnow() - relativedelta(years=6, months=0)).date())
-
-        self.assertFalse(
-            self.pc.func_6_years_old(self.infant_visits[1],))
+            self.pc.func_36_months_younger(self.infant_visits[0], ))
 
     @property
     def infant_visits(self):
