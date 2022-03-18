@@ -327,3 +327,16 @@ class ChildPredicates(PredicateCollection):
                 return False
             return False
         return False
+    
+    def func_2000D_and_negative(self, visit, **kwargs):
+        """
+
+        Returns True if the mother is hiv negative and and when its visit 2000D
+
+        """
+
+        hiv_status = self.get_latest_maternal_hiv_status(
+
+            visit=visit).hiv_status
+
+        return hiv_status == NEG and visit.visit_code == '2000D'
