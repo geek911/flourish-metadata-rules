@@ -13,8 +13,6 @@ from .models import MaternalDataset, AntenatalEnrollment, CyhuuPreEnrollment, Su
 from .models import ScreeningPriorBhpParticipants
 
 tag('mp')
-
-
 class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
 
     reference_helper_cls = ReferenceTestHelper

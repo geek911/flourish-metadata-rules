@@ -88,11 +88,23 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.infantdevscreening36months', ])
 
-    age_60to72_months_old = CrfRule(
-        predicate=pc.func_5_to_6_years_old,
+    age_60_months_old = CrfRule(
+        predicate=pc.func_60_months_old,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.infantdevscreening60to72months', ])
+        target_models=[f'{app_label}.infantdevscreening60months', ])
+
+    age_72_months_old = CrfRule(
+        predicate=pc.func_72_months_old,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.infantdevscreening72months', ])
+
+    forth_eighth_quarter = CrfRule(
+        predicate=pc.func_forth_eighth_quarter,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.childfoodsecurityquestionnaire', ])
 
     class Meta:
         app_label = app_label

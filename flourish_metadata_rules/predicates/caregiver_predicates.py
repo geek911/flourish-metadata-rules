@@ -22,7 +22,7 @@ class CaregiverPredicates(PredicateCollection):
             maternal_visit=visit, subject_identifier=visit.subject_identifier)
         return maternal_status_helper.hiv_status == POS
 
-    def pregnant(self, visit=None, **kwargs):
+    def enrolled_pregnant(self, visit=None, **kwargs):
         """Returns true if expecting
         """
         enrollment_model = django_apps.get_model(f'{self.app_label}.antenatalenrollment')
@@ -31,6 +31,11 @@ class CaregiverPredicates(PredicateCollection):
         except enrollment_model.DoesNotExist:
             return False
         else:
+            return True
+
+    def currently_pregnant(self, visit=None, **kwargs):
+
+        if self.enrolled_pregnant(visit=visit, **kwargs):
             maternal_delivery_cls = django_apps.get_model(f'{self.app_label}.maternaldelivery')
             try:
                 maternal_delivery_cls.objects.get(subject_identifier=visit.subject_identifier)
@@ -55,7 +60,9 @@ class CaregiverPredicates(PredicateCollection):
         child_subject_identifier = None
 
         try:
-            onschedule_obj = onschedule_model.objects.get(subject_identifier=visit.appointment.subject_identifier, schedule_name=visit.appointment.schedule_name)
+            onschedule_obj = onschedule_model.objects.get(
+                subject_identifier=visit.appointment.subject_identifier,
+                schedule_name=visit.appointment.schedule_name)
         except onschedule_model.DoesNotExist:
             pass
         else:
@@ -94,12 +101,14 @@ class CaregiverPredicates(PredicateCollection):
         """Returns true if participant is expecting and never
         participated in a BHP study for enrollment_visit.
         """
-        return self.pregnant(visit=visit) and not self.prior_participation(visit=visit)
+        return (self.currently_pregnant(visit=visit)
+                and not self.prior_participation(visit=visit))
 
     def func_caregiver_no_prior_participation(self, visit=None, **kwargs):
         """Returns true if participant is a caregiver and never participated in a BHP study.
         """
-        return not self.pregnant(visit=visit) and not self.prior_participation(visit=visit)
+        return (not self.enrolled_pregnant(visit=visit)
+                and not self.prior_participation(visit=visit))
 
     def func_bio_mother(self, visit=None, **kwargs):
         consent_cls = django_apps.get_model(f'{self.app_label}.subjectconsent')
@@ -115,7 +124,7 @@ class CaregiverPredicates(PredicateCollection):
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             maternal_visit=visit)
 
-        return (self.func_bio_mother(visit=visit) and not self.pregnant(visit=visit)
+        return (self.func_bio_mother(visit=visit) and not self.currently_pregnant(visit=visit)
                 and maternal_status_helper.hiv_status == POS)
 
     def func_bio_mothers_hiv_cohort_a(self, visit=None,
@@ -137,13 +146,13 @@ class CaregiverPredicates(PredicateCollection):
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             maternal_visit=visit)
 
-        return (self.pregnant(visit=visit)
+        return (self.enrolled_pregnant(visit=visit)
                 and maternal_status_helper.hiv_status == POS)
 
     def func_non_pregnant_caregivers(self, visit=None, **kwargs):
         """Returns true if non pregnant.
         """
-        return not self.pregnant(visit=visit)
+        return not self.enrolled_pregnant(visit=visit)
 
     def func_newly_recruited(self, visit=None, **kwargs):
         cyhuu_model_cls = django_apps.get_model(
@@ -214,10 +223,11 @@ class CaregiverPredicates(PredicateCollection):
             visit)
 
         if maternal_status_helper.hiv_status != POS:
-            if self.pregnant(visit=visit) and visit.visit_code == '1000M':
+            if self.currently_pregnant(visit=visit) and visit.visit_code == '1000M':
                 return True
             elif (maternal_status_helper.hiv_status == NEG
-                    and not self.pregnant(visit=visit) and visit.visit_code == '2000M'):
+                    and not self.currently_pregnant(visit=visit)
+                    and visit.visit_code == '2000M'):
                 return True
             else:
                 prev_rapid_test = Reference.objects.filter(
