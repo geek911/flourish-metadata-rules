@@ -3,7 +3,7 @@ from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
-from edc_constants.constants import FEMALE, YES, POS
+from edc_constants.constants import FEMALE, YES, POS, NEG
 from edc_metadata_rules import PredicateCollection
 from flourish_caregiver.helper_classes import MaternalStatusHelper
 
@@ -241,3 +241,12 @@ class ChildPredicates(PredicateCollection):
         """
         child_age = self.get_child_age(visit=visit)
         return 5 <= child_age.years <= 6 if child_age else False
+
+    def func_2000D_and_negative(self, visit, **kwargs):
+        """
+        Returns True if the mother is hiv negative and and when its visit 2000D
+        """
+        hiv_status = self.get_latest_maternal_hiv_status(
+            visit=visit).hiv_status
+
+        return hiv_status == NEG and visit.visit_code == '2000D'
