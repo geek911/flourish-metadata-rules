@@ -1,7 +1,7 @@
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
-from edc_constants.constants import FEMALE, YES, POS
+from edc_constants.constants import FEMALE, YES, POS, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
 
@@ -327,3 +327,16 @@ class ChildPredicates(PredicateCollection):
                 return False
             return False
         return False
+    
+    def func_2000D_and_negative(self, visit, **kwargs):
+        """
+
+        Returns True if the mother is hiv negative and and when its visit 2000D
+
+        """
+
+        hiv_status = self.get_latest_maternal_hiv_status(
+
+            visit=visit).hiv_status
+
+        return hiv_status == NEG and visit.visit_code == '2000D'
