@@ -13,7 +13,7 @@ class MaternalVisitReqRuleGroup(RequisitionRuleGroup):
 
     # Make VL Required regardless the pregnancy status
     viral_load_panel = RequisitionRule(
-        predicate=pc.func_hiv_positive,
+        predicate=pc.viral_load,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_panels=[viral_load_panel, ])
