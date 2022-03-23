@@ -1,4 +1,4 @@
-import datetime
+from datetime import date
 from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 from django.apps import apps as django_apps
@@ -101,7 +101,7 @@ class CaregiverPredicates(PredicateCollection):
         """Returns true if participant is expecting and never
         participated in a BHP study for enrollment_visit.
         """
-        return (self.currently_pregnant(visit=visit)
+        return (self.enrolled_pregnant(visit=visit)
                 and not self.prior_participation(visit=visit))
 
     def func_caregiver_no_prior_participation(self, visit=None, **kwargs):
@@ -243,7 +243,7 @@ class CaregiverPredicates(PredicateCollection):
                                 report_datetime=prev_rapid_test.report_datetime,
                                 field_name='result_date')
 
-                    if isinstance(result_date[0], datetime.date):
+                    if result_date and isinstance(result_date[0], date):
 
                         return (visit.report_datetime.date() - result_date[0]).days > 90
         return False

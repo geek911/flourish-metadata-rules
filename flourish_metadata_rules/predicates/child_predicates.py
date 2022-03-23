@@ -237,9 +237,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if child_age.months == 3 and child_age.years == 0:
             try:
-                previous_instance = self.infant_dev_screening_3_months_cls.objects.get(
-                    child_visit__subject_identifier=visit.subject_identifier
-                    )
+                self.infant_dev_screening_3_months_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier)
             except self.infant_dev_screening_3_months_cls.DoesNotExist:
                 return True
             else:
@@ -252,9 +251,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 0 and child_age.months == 6:
             try:
-                previous_instance = self.infant_dev_screening_6_months_cls.objects.get(
-                    child_visit__subject_identifier=visit.subject_identifier
-                    )
+                self.infant_dev_screening_6_months_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier)
             except self.infant_dev_screening_6_months_cls.DoesNotExist:
                 return True
             else:
@@ -267,9 +265,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 1:
             try:
-                previous_instance = self.infant_dev_screening_12_months_cls.objects.get(
-                    child_visit__subject_identifier=visit.subject_identifier
-                    )
+                self.infant_dev_screening_12_months_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier)
             except self.infant_dev_screening_12_months_cls.DoesNotExist:
                 return True
             else:
@@ -282,9 +279,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 1 and child_age.months == 6:
             try:
-                previous_instance = self.infant_dev_screening_18_months_cls.objects.get(
-                    child_visit__subject_identifier=visit.subject_identifier
-                    )
+                self.infant_dev_screening_18_months_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier)
             except self.infant_dev_screening_18_months_cls.DoesNotExist:
                 return True
             else:
@@ -297,9 +293,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 3:
             try:
-                previous_instance = self.infant_dev_screening_36_months_cls.objects.get(
-                    child_visit__subject_identifier=visit.subject_identifier
-                    )
+                self.infant_dev_screening_36_months_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier)
             except self.infant_dev_screening_36_months_cls.DoesNotExist:
                 return True
             else:
@@ -312,9 +307,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 5:
             try:
-                previous_instance = self.infant_dev_screening_60_months_cls.objects.get(
-                    child_visit__subject_identifier=visit.subject_identifier
-                    )
+                self.infant_dev_screening_60_months_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier)
             except self.infant_dev_screening_60_months_cls.DoesNotExist:
                 return True
             else:
@@ -327,9 +321,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 6:
             try:
-                previous_instance = self.infant_dev_screening_72_months_cls.objects.get(
-                    child_visit__subject_identifier=visit.subject_identifier
-                    )
+                self.infant_dev_screening_72_months_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier)
             except self.infant_dev_screening_72_months_cls.DoesNotExist:
                 return True
             else:
