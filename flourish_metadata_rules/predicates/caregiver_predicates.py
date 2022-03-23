@@ -1,5 +1,4 @@
 import datetime
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 from django.apps import apps as django_apps
 from edc_base.utils import age
@@ -7,9 +6,10 @@ from edc_constants.constants import POS, YES, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
 
+from flourish_caregiver.helper_classes import MaternalStatusHelper
+
 
 class CaregiverPredicates(PredicateCollection):
-
     app_label = 'flourish_caregiver'
     pre_app_label = 'pre_flourish'
     visit_model = f'{app_label}.maternalvisit'
@@ -21,6 +21,13 @@ class CaregiverPredicates(PredicateCollection):
         maternal_status_helper = MaternalStatusHelper(
             maternal_visit=visit, subject_identifier=visit.subject_identifier)
         return maternal_status_helper.hiv_status == POS
+
+    def viral_load(self, visit=None, **kwargs):
+        """
+        Returns true if the visit is 1000 or 200D and the caregiver is pos
+        """
+        return self.func_hiv_positive(visit=visit) and visit.visit_code in ['1000M',
+                                                                            '2000D']
 
     def enrolled_pregnant(self, visit=None, **kwargs):
         """Returns true if expecting
@@ -36,9 +43,11 @@ class CaregiverPredicates(PredicateCollection):
     def currently_pregnant(self, visit=None, **kwargs):
 
         if self.enrolled_pregnant(visit=visit, **kwargs):
-            maternal_delivery_cls = django_apps.get_model(f'{self.app_label}.maternaldelivery')
+            maternal_delivery_cls = django_apps.get_model(
+                f'{self.app_label}.maternaldelivery')
             try:
-                maternal_delivery_cls.objects.get(subject_identifier=visit.subject_identifier)
+                maternal_delivery_cls.objects.get(
+                    subject_identifier=visit.subject_identifier)
             except maternal_delivery_cls.DoesNotExist:
                 return True
         return False
@@ -56,7 +65,8 @@ class CaregiverPredicates(PredicateCollection):
 
     def child_gt10(self, visit):
 
-        onschedule_model = django_apps.get_model(visit.appointment.schedule.onschedule_model)
+        onschedule_model = django_apps.get_model(
+            visit.appointment.schedule.onschedule_model)
         child_subject_identifier = None
 
         try:
@@ -70,8 +80,10 @@ class CaregiverPredicates(PredicateCollection):
             if 'antenatal' not in onschedule_obj.schedule_name:
                 child_subject_identifier = onschedule_obj.child_subject_identifier
 
-        if child_subject_identifier and not self.is_child_offstudy(child_subject_identifier):
-            registered_model = django_apps.get_model(f'edc_registration.registeredsubject')
+        if child_subject_identifier and not self.is_child_offstudy(
+                child_subject_identifier):
+            registered_model = django_apps.get_model(
+                f'edc_registration.registeredsubject')
 
             try:
                 registered_child = registered_model.objects.get(
@@ -82,16 +94,17 @@ class CaregiverPredicates(PredicateCollection):
                 child_age = age(registered_child.dob, visit.report_datetime)
                 child_age = float(f'{child_age.years}.{child_age.months}')
 
-                if(child_age <= 15.9 and child_age >= 10):
-
+                if (child_age <= 15.9 and child_age >= 10):
                     return [True, child_subject_identifier]
         return [False, child_subject_identifier]
 
     def prior_participation(self, visit=None, **kwargs):
-        maternal_dataset_model = django_apps.get_model(f'{self.app_label}.maternaldataset')
+        maternal_dataset_model = django_apps.get_model(
+            f'{self.app_label}.maternaldataset')
 
         try:
-            maternal_dataset_model.objects.get(subject_identifier=visit.subject_identifier)
+            maternal_dataset_model.objects.get(
+                subject_identifier=visit.subject_identifier)
         except maternal_dataset_model.DoesNotExist:
             return False
         else:
@@ -114,7 +127,7 @@ class CaregiverPredicates(PredicateCollection):
         consent_cls = django_apps.get_model(f'{self.app_label}.subjectconsent')
 
         consent_obj = consent_cls.objects.filter(
-                subject_identifier=visit.subject_identifier,).latest('created')
+            subject_identifier=visit.subject_identifier, ).latest('created')
 
         return consent_obj.biological_caregiver == YES
 
@@ -124,11 +137,13 @@ class CaregiverPredicates(PredicateCollection):
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             maternal_visit=visit)
 
-        return (self.func_bio_mother(visit=visit) and not self.currently_pregnant(visit=visit)
+        return (self.func_bio_mother(visit=visit) and not self.currently_pregnant(
+            visit=visit)
                 and maternal_status_helper.hiv_status == POS)
 
     def func_bio_mothers_hiv_cohort_a(self, visit=None,
-                                      maternal_status_helper=None, **kwargs):
+            maternal_status_helper=None, **kwargs
+            ):
         """Returns true if participant is biological mother living with HIV.
         """
 
@@ -140,7 +155,8 @@ class CaregiverPredicates(PredicateCollection):
         return cohort_a and self.func_bio_mother_hiv(visit=visit)
 
     def func_pregnant_hiv(self, visit=None,
-                          maternal_status_helper=None, **kwargs):
+            maternal_status_helper=None, **kwargs
+            ):
         """Returns true if a newly enrolled participant is pregnant and living with HIV.
         """
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
@@ -156,7 +172,7 @@ class CaregiverPredicates(PredicateCollection):
 
     def func_newly_recruited(self, visit=None, **kwargs):
         cyhuu_model_cls = django_apps.get_model(
-                f'{self.pre_app_label}.cyhuupreenrollment')
+            f'{self.pre_app_label}.cyhuupreenrollment')
         try:
             cyhuu_model_cls.objects.get(
                 maternal_visit__appointment__subject_identifier=visit.subject_identifier)
@@ -215,7 +231,8 @@ class CaregiverPredicates(PredicateCollection):
                                                              ['-36', ])
 
     def func_show_hiv_test_form(
-            self, visit=None, maternal_status_helper=None, **kwargs):
+            self, visit=None, maternal_status_helper=None, **kwargs
+            ):
         subject_identifier = visit.subject_identifier
         result_date = None
 
@@ -226,24 +243,23 @@ class CaregiverPredicates(PredicateCollection):
             if self.currently_pregnant(visit=visit) and visit.visit_code == '1000M':
                 return True
             elif (maternal_status_helper.hiv_status == NEG
-                    and not self.currently_pregnant(visit=visit)
-                    and visit.visit_code == '2000M'):
+                  and not self.currently_pregnant(visit=visit)
+                  and visit.visit_code == '2000M'):
                 return True
             else:
                 prev_rapid_test = Reference.objects.filter(
                     model=f'{self.app_label}.hivrapidtestcounseling',
                     report_datetime__lt=visit.report_datetime,
                     identifier=subject_identifier).order_by(
-                        '-report_datetime').last()
+                    '-report_datetime').last()
 
                 if prev_rapid_test:
                     result_date = self.exists(
-                                reference_name=f'{self.app_label}.hivrapidtestcounseling',
-                                subject_identifier=visit.subject_identifier,
-                                report_datetime=prev_rapid_test.report_datetime,
-                                field_name='result_date')
+                        reference_name=f'{self.app_label}.hivrapidtestcounseling',
+                        subject_identifier=visit.subject_identifier,
+                        report_datetime=prev_rapid_test.report_datetime,
+                        field_name='result_date')
 
                     if isinstance(result_date[0], datetime.date):
-
                         return (visit.report_datetime.date() - result_date[0]).days > 90
         return False
