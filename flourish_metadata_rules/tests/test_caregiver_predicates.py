@@ -7,16 +7,16 @@ from edc_facility.import_holidays import import_holidays
 from edc_reference import LongitudinalRefset
 from edc_reference.tests import ReferenceTestHelper
 
-from ..predicates import CaregiverPredicates
-from .models import HivRapidTestCounseling, MaternalVisit, Appointment, CaregiverChildConsent
-from .models import MaternalDataset, AntenatalEnrollment, CyhuuPreEnrollment, SubjectConsent
+from .models import HivRapidTestCounseling, MaternalVisit, Appointment, \
+    CaregiverChildConsent
+from .models import MaternalDataset, AntenatalEnrollment, CyhuuPreEnrollment, \
+    SubjectConsent
 from .models import ScreeningPriorBhpParticipants
+from ..predicates import CaregiverPredicates
 
-tag('mp')
 
-
+@tag('mp')
 class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
-
     reference_helper_cls = ReferenceTestHelper
     app_label = 'flourish_metadata_rules'
     pre_app_label = 'flourish_metadata_rules'
@@ -31,7 +31,6 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
         super().tearDown()
 
     def setUp(self):
-
         self.subject_identifier = '111111111'
         self.screening_identifier = '12345'
         self.reference_helper = self.reference_helper_cls(
@@ -57,14 +56,14 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
         AntenatalEnrollment.objects.create(subject_identifier=self.subject_identifier)
 
         self.assertTrue(
-            pc.func_preg_no_prior_participation(self.maternal_visits[0],))
+            pc.func_preg_no_prior_participation(self.maternal_visits[0], ))
 
     def test_func_caregiver_no_prior_participation(self):
         pc = CaregiverPredicates()
         pc.app_label = self.app_label
 
         self.assertTrue(
-            pc.func_caregiver_no_prior_participation(self.maternal_visits[0],))
+            pc.func_caregiver_no_prior_participation(self.maternal_visits[0], ))
 
     def test_func_bio_mothers(self):
         pc = CaregiverPredicates()
@@ -75,7 +74,8 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
         SubjectConsent.objects.create(subject_identifier=self.subject_identifier,
                                       screening_identifier=self.screening_identifier,
                                       biological_caregiver=YES)
-        appointment = Appointment.objects.create(subject_identifier=self.subject_identifier)
+        appointment = Appointment.objects.create(
+            subject_identifier=self.subject_identifier)
         maternal_visit = MaternalVisit.objects.create(
             appointment=appointment,
             subject_identifier=self.subject_identifier)
@@ -86,7 +86,7 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
                                               result=NEG)
 
         self.assertTrue(
-            pc.func_bio_mothers_hiv_cohort_a(self.maternal_visits[1],))
+            pc.func_bio_mothers_hiv_cohort_a(self.maternal_visits[1], ))
 
     def test_func_bio_mothers_hiv(self):
         pc = CaregiverPredicates()
@@ -100,7 +100,8 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
         SubjectConsent.objects.create(subject_identifier=self.subject_identifier,
                                       screening_identifier=self.screening_identifier,
                                       biological_caregiver=YES)
-        appointment = Appointment.objects.create(subject_identifier=self.subject_identifier)
+        appointment = Appointment.objects.create(
+            subject_identifier=self.subject_identifier)
         maternal_visit = MaternalVisit.objects.create(
             appointment=appointment,
             subject_identifier=self.subject_identifier)
@@ -109,14 +110,15 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
                                               result=POS)
 
         self.assertTrue(
-            pc.func_bio_mothers_hiv_cohort_a(self.maternal_visits[1],))
+            pc.func_bio_mothers_hiv_cohort_a(self.maternal_visits[1], ))
 
     def test_func_pregnant_hiv(self):
         pc = CaregiverPredicates()
         pc.app_label = self.app_label
 
         AntenatalEnrollment.objects.create(subject_identifier=self.subject_identifier)
-        appointment = Appointment.objects.create(subject_identifier=self.subject_identifier)
+        appointment = Appointment.objects.create(
+            subject_identifier=self.subject_identifier)
         maternal_visit = MaternalVisit.objects.create(appointment=appointment,
                                                       subject_identifier=self.subject_identifier)
         HivRapidTestCounseling.objects.create(maternal_visit=maternal_visit,
@@ -124,7 +126,7 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
                                               result=POS)
 
         self.assertTrue(
-            pc.func_pregnant_hiv(self.maternal_visits[0],))
+            pc.func_pregnant_hiv(self.maternal_visits[0], ))
 
     def test_func_non_pregnant_caregivers(self):
         pc = CaregiverPredicates()
@@ -132,14 +134,15 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
 
         MaternalDataset.objects.create(subject_identifier=self.subject_identifier)
         self.assertTrue(
-            pc.func_non_pregnant_caregivers(self.maternal_visits[0],))
+            pc.func_non_pregnant_caregivers(self.maternal_visits[0], ))
 
     def test_func_newly_recruited(self):
         pc = CaregiverPredicates()
         pc.app_label = self.app_label
         pc.pre_app_label = self.app_label
 
-        appointment = Appointment.objects.create(subject_identifier=self.subject_identifier)
+        appointment = Appointment.objects.create(
+            subject_identifier=self.subject_identifier)
         maternal_visit = MaternalVisit.objects.create(
             appointment=appointment,
             subject_identifier=self.subject_identifier)
@@ -149,7 +152,7 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
 
         MaternalDataset.objects.create(subject_identifier=self.subject_identifier)
         self.assertTrue(
-            pc.func_newly_recruited(self.maternal_visits[0],))
+            pc.func_newly_recruited(self.maternal_visits[0], ))
 
     def test_func_LWHIV_aged_10_15a(self):
         pc = CaregiverPredicates()
@@ -161,7 +164,7 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
             child_dob=get_utcnow() - relativedelta(years=12))
 
         self.assertTrue(
-            pc.func_LWHIV_aged_10_15a(self.maternal_visits[0],))
+            pc.func_LWHIV_aged_10_15a(self.maternal_visits[0], ))
 
     @property
     def maternal_visits(self):
@@ -170,4 +173,4 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
             visit_model=self.visit_model,
             name=self.visit_model,
             reference_model_cls=self.reference_model
-        ).order_by('report_datetime')
+            ).order_by('report_datetime')
