@@ -248,7 +248,7 @@ class ChildPredicates(PredicateCollection):
         Returns True if the participant is 18 months old
         """
         child_age = self.get_child_age(visit=visit)
-        if child_age.years == 1 and child_age.months <= 6:
+        if child_age.years == 1 and child_age.months >= 6:
             previous_dev_screening = Reference.objects.filter(
                 model=f'{self.app_label}.infantdevscreening18months',
                 identifier=visit.appointment.subject_identifier,
