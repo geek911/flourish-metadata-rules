@@ -1,11 +1,11 @@
-from flourish_caregiver.helper_classes import MaternalStatusHelper
-
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES, POS, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
+
+from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -219,7 +219,6 @@ class ChildPredicates(PredicateCollection):
         """
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 0 and child_age.months == 6:
-
             previous_dev_screening = Reference.objects.filter(
                 model=f'{self.app_label}.infantdevscreening6months',
                 identifier=visit.appointment.subject_identifier,
@@ -234,8 +233,7 @@ class ChildPredicates(PredicateCollection):
         Returns True if the participant is 12 months old
         """
         child_age = self.get_child_age(visit=visit)
-        if child_age.years == 1:
-
+        if child_age.years == 1 and child_age.months < 7:
             previous_dev_screening = Reference.objects.filter(
                 model=f'{self.app_label}.infantdevscreening12months',
                 identifier=visit.appointment.subject_identifier,
@@ -250,8 +248,7 @@ class ChildPredicates(PredicateCollection):
         Returns True if the participant is 18 months old
         """
         child_age = self.get_child_age(visit=visit)
-        if child_age.years == 1 and child_age.months == 6:
-
+        if child_age.years == 1 and child_age.months <= 6:
             previous_dev_screening = Reference.objects.filter(
                 model=f'{self.app_label}.infantdevscreening18months',
                 identifier=visit.appointment.subject_identifier,
@@ -267,7 +264,6 @@ class ChildPredicates(PredicateCollection):
         """
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 3:
-
             previous_dev_screening = Reference.objects.filter(
                 model=f'{self.app_label}.infantdevscreening36months',
                 identifier=visit.appointment.subject_identifier,
@@ -283,7 +279,6 @@ class ChildPredicates(PredicateCollection):
         """
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 5:
-
             previous_dev_screening = Reference.objects.filter(
                 model=f'{self.app_label}.infantdevscreening60months',
                 identifier=visit.appointment.subject_identifier,
@@ -299,7 +294,6 @@ class ChildPredicates(PredicateCollection):
         """
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 6:
-
             previous_dev_screening = Reference.objects.filter(
                 model=f'{self.app_label}.infantdevscreening72months',
                 identifier=visit.appointment.subject_identifier,
