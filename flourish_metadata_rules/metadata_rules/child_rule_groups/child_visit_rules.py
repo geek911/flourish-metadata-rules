@@ -1,5 +1,6 @@
 from edc_metadata import NOT_REQUIRED, REQUIRED
 from edc_metadata_rules import CrfRule, CrfRuleGroup, register
+
 from ...predicates import ChildPredicates
 
 app_label = 'flourish_child'
@@ -8,7 +9,6 @@ pc = ChildPredicates()
 
 @register()
 class ChildVisitRuleGroup(CrfRuleGroup):
-
     consent_study_pregnant = CrfRule(
         predicate=pc.func_consent_study_pregnant,
         consequence=REQUIRED,
@@ -70,6 +70,12 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.infantdevscreening6months', ])
 
+    age_9_months_old = CrfRule(
+        predicate=pc.func_9_months_old,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.infantdevscreening9months', ])
+
     age_12_months_old = CrfRule(
         predicate=pc.func_12_months_old,
         consequence=REQUIRED,
@@ -105,6 +111,7 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.childfoodsecurityquestionnaire', ])
+
 
     class Meta:
         app_label = app_label
