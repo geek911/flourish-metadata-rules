@@ -1,11 +1,11 @@
-from flourish_caregiver.helper_classes import MaternalStatusHelper
-
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES, POS, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
+
+from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -198,68 +198,62 @@ class ChildPredicates(PredicateCollection):
             return True
         return False
 
+    def previous_dev_screening(self, visit, model):
+        return Reference.objects.filter(
+            model=model,
+            identifier=visit.appointment.subject_identifier,
+            report_datetime__lt=visit.report_datetime).order_by(
+            '-report_datetime').first()
+
     def func_3_months_old(self, visit=None, **kwargs):
         """
         Returns True if the participant is 3 months old
         """
         child_age = self.get_child_age(visit=visit)
-        if child_age.months == 3 and child_age.years == 0:
-            previous_dev_screening = Reference.objects.filter(
-                model=f'{self.app_label}.infantdevscreening3months',
-                identifier=visit.appointment.subject_identifier,
-                report_datetime__lt=visit.report_datetime).order_by(
-                '-report_datetime').first()
-
-            return False if previous_dev_screening else True
-        return False
+        if 6 > child_age.months > 3 and child_age.years == 0:
+            model = f'{self.app_label}.infantdevscreening3months'
+            return False if self.previous_dev_screening(visit=visit,
+                                                        model=model) else True
 
     def func_6_months_old(self, visit=None, **kwargs):
         """
         Returns True if the participant is 6 months old
         """
         child_age = self.get_child_age(visit=visit)
-        if child_age.years == 0 and child_age.months == 6:
+        if child_age.years == 0 and 9 > child_age.months > 6:
+            model = f'{self.app_label}.infantdevscreening6months'
+            return False if self.previous_dev_screening(visit=visit,
+                                                        model=model) else True
 
-            previous_dev_screening = Reference.objects.filter(
-                model=f'{self.app_label}.infantdevscreening6months',
-                identifier=visit.appointment.subject_identifier,
-                report_datetime__lt=visit.report_datetime).order_by(
-                '-report_datetime').first()
-
-            return False if previous_dev_screening else True
-        return False
+    def func_9_months_old(self, visit=None, **kwargs):
+        """
+        Returns True if the participant is 9 months old
+        """
+        child_age = self.get_child_age(visit=visit)
+        if child_age.years == 0 and 12 > child_age.months > 9:
+            model = f'{self.app_label}.infantdevscreening9months'
+            return False if self.previous_dev_screening(visit=visit,
+                                                        model=model) else True
 
     def func_12_months_old(self, visit=None, **kwargs):
         """
         Returns True if the participant is 12 months old
         """
         child_age = self.get_child_age(visit=visit)
-        if child_age.years == 1:
-
-            previous_dev_screening = Reference.objects.filter(
-                model=f'{self.app_label}.infantdevscreening12months',
-                identifier=visit.appointment.subject_identifier,
-                report_datetime__lt=visit.report_datetime).order_by(
-                '-report_datetime').first()
-
-            return False if previous_dev_screening else True
-        return False
+        if child_age.years == 1 and child_age.months < 6:
+            model = f'{self.app_label}.infantdevscreening12months'
+            return False if self.previous_dev_screening(visit=visit,
+                                                        model=model) else True
 
     def func_18_months_old(self, visit=None, **kwargs):
         """
         Returns True if the participant is 18 months old
         """
         child_age = self.get_child_age(visit=visit)
-        if child_age.years == 1 and child_age.months == 6:
-
-            previous_dev_screening = Reference.objects.filter(
-                model=f'{self.app_label}.infantdevscreening18months',
-                identifier=visit.appointment.subject_identifier,
-                report_datetime__lt=visit.report_datetime).order_by(
-                '-report_datetime').first()
-
-            return False if previous_dev_screening else True
-        return False
+        if child_age.years == 1 and child_age.months >= 6:
+            model = f'{self.app_label}.infantdevscreening18months'
+            return False if self.previous_dev_screening(visit=visit,
+                                                        model=model) else True
 
     def func_36_months_old(self, visit=None, **kwargs):
         """
@@ -267,15 +261,9 @@ class ChildPredicates(PredicateCollection):
         """
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 3:
-
-            previous_dev_screening = Reference.objects.filter(
-                model=f'{self.app_label}.infantdevscreening36months',
-                identifier=visit.appointment.subject_identifier,
-                report_datetime__lt=visit.report_datetime).order_by(
-                '-report_datetime').first()
-
-            return False if previous_dev_screening else True
-        return False
+            model = f'{self.app_label}.infantdevscreening36months'
+            return False if self.previous_dev_screening(visit=visit,
+                                                        model=model) else True
 
     def func_60_months_old(self, visit=None, **kwargs):
         """
@@ -283,15 +271,9 @@ class ChildPredicates(PredicateCollection):
         """
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 5:
-
-            previous_dev_screening = Reference.objects.filter(
-                model=f'{self.app_label}.infantdevscreening60months',
-                identifier=visit.appointment.subject_identifier,
-                report_datetime__lt=visit.report_datetime).order_by(
-                '-report_datetime').first()
-
-            return False if previous_dev_screening else True
-        return False
+            model = f'{self.app_label}.infantdevscreening60months'
+            return False if self.previous_dev_screening(visit=visit,
+                                                        model=model) else True
 
     def func_72_months_old(self, visit=None, **kwargs):
         """
@@ -299,14 +281,9 @@ class ChildPredicates(PredicateCollection):
         """
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 6:
-
-            previous_dev_screening = Reference.objects.filter(
-                model=f'{self.app_label}.infantdevscreening72months',
-                identifier=visit.appointment.subject_identifier,
-                report_datetime__lt=visit.report_datetime).order_by(
-                '-report_datetime').first()
-            return False if previous_dev_screening else True
-        return False
+            model = f'{self.app_label}.infantdevscreening72months'
+            return False if self.previous_dev_screening(visit=visit,
+                                                        model=model) else True
 
     def func_forth_eighth_quarter(self, visit=None, **kwargs):
         """
