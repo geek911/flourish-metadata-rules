@@ -210,7 +210,7 @@ class ChildPredicates(PredicateCollection):
         Returns True if the participant is 3 months old
         """
         child_age = self.get_child_age(visit=visit)
-        if 6 > child_age.months > 3 and child_age.years == 0:
+        if 6 > child_age.months >= 3 and child_age.years == 0:
             model = f'{self.app_label}.infantdevscreening3months'
             return False if self.previous_dev_screening(visit=visit,
                                                         model=model) else True
@@ -220,7 +220,7 @@ class ChildPredicates(PredicateCollection):
         Returns True if the participant is 6 months old
         """
         child_age = self.get_child_age(visit=visit)
-        if child_age.years == 0 and 9 > child_age.months > 6:
+        if child_age.years == 0 and 9 > child_age.months >= 6:
             model = f'{self.app_label}.infantdevscreening6months'
             return False if self.previous_dev_screening(visit=visit,
                                                         model=model) else True
@@ -230,7 +230,7 @@ class ChildPredicates(PredicateCollection):
         Returns True if the participant is 9 months old
         """
         child_age = self.get_child_age(visit=visit)
-        if child_age.years == 0 and 12 > child_age.months > 9:
+        if child_age.years == 0 and 12 > child_age.months >= 9:
             model = f'{self.app_label}.infantdevscreening9months'
             return False if self.previous_dev_screening(visit=visit,
                                                         model=model) else True
