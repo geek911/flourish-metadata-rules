@@ -97,6 +97,8 @@ class ChildPredicates(PredicateCollection):
         """
         maternal_delivery_cls = django_apps.get_model(
             f'{self.maternal_app_label}.maternaldelivery')
+        child_birth_data_model = f'{self.app_label}.birthdata'
+
         try:
             maternal_delivery_cls.objects.get(
                 subject_identifier=visit.subject_identifier[:-3],
@@ -104,7 +106,12 @@ class ChildPredicates(PredicateCollection):
         except maternal_delivery_cls.DoesNotExist:
             return False
         else:
-            return True
+            previous_obj = Reference.objects.filter(
+                model=child_birth_data_model,
+                identifier=visit.appointment.subject_identifier,
+                report_datetime__lt=visit.report_datetime).order_by(
+                '-report_datetime').first()
+            return False if previous_obj else True
 
     def func_mother_preg_pos(self, visit=None, **kwargs):
         """ Returns True if participant's mother consented to the study in
