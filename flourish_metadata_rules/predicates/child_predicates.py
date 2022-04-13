@@ -81,7 +81,8 @@ class ChildPredicates(PredicateCollection):
                 return age(caregiver_child_consent.child_dob, get_utcnow())
 
     def child_age_at_enrolment(self, visit):
-        if not self.mother_pregnant(visit=visit):
+        if not self.mother_pregnant(visit=visit) \
+                and not self.func_consent_study_pregnant(visit):
 
             dummy_consent_cls = django_apps.get_model(
                 f'{self.app_label}.childdummysubjectconsent')
@@ -187,8 +188,7 @@ class ChildPredicates(PredicateCollection):
         return child_age.months >= 2 if child_age else False
 
     def func_36_months_younger(self, visit=None, **kwargs):
-        child_age = self.child_age_at_enrolment(visit=visit)
-
+        child_age = self.get_child_age(visit=visit)
         return ((child_age.years * 12) + child_age.months) < 36 if child_age else False
 
     def func_continued_consent(self, visit=None, **kwargs):
