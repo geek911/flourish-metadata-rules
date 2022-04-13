@@ -78,7 +78,7 @@ class ChildPredicates(PredicateCollection):
                 subject_identifier=visit.subject_identifier)
             if consents:
                 caregiver_child_consent = consents.latest('consent_datetime')
-                return age(caregiver_child_consent.child_dob, get_utcnow())
+                return age(caregiver_child_consent.child_dob, visit.report_datetime)
 
     def child_age_at_enrolment(self, visit):
         if not self.mother_pregnant(visit=visit) \
