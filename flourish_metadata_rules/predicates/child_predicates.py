@@ -191,6 +191,16 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         return ((child_age.years * 12) + child_age.months) < 36 if child_age else False
 
+    def func_36_months_younger_not_birthvisit(self, visit=None, **kwargs):
+
+        if visit.visit_code == "2000D":
+            """
+            if visit is a birth visit, 
+            """
+            return False
+
+        return self.func_36_months_younger(visit, **kwargs)
+
     def func_continued_consent(self, visit=None, **kwargs):
         """Returns True if participant is over 18 and continued consent has been completed
         """

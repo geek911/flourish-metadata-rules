@@ -38,9 +38,15 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
         self.reference_helper.create_visit(
             report_datetime=report_datetime + relativedelta(days=1),
             timepoint='2000')
+
         self.reference_helper.create_visit(
             report_datetime=report_datetime + relativedelta(days=3),
             timepoint='3000')
+
+        self.reference_helper.create_visit(
+            report_datetime=report_datetime + relativedelta(days=3),
+            timepoint='2000D')
+
 
         self.pc = ChildPredicates()
         self.pc.app_label = self.app_label
@@ -121,6 +127,16 @@ class TestChildPredicates(SiteTestCaseMixin, TestCase):
 
         self.assertTrue(
             self.pc.func_36_months_younger(self.infant_visits[0], ))
+
+    @tag('36_month_but_not_birthvisit')
+    def test_func_36_months_younger_and_not_birthvisit(self):
+        ChildDummySubjectConsent.objects.create(
+            subject_identifier=self.subject_identifier,
+            dob=(get_utcnow() - relativedelta(months=12)).date())
+
+        breakpoint()
+        self.assertFalse(
+            self.pc.func_36_months_younger_not_birthvisit(self.infant_visits[2], ))
 
     @property
     def infant_visits(self):
