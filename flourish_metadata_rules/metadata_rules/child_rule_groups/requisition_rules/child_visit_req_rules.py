@@ -20,7 +20,7 @@ class ChildVisitReqRuleGroup(RequisitionRuleGroup):
 
     #  stool sample for 2000D if the mother is negative
     stool_sample_panel_rule = RequisitionRule(
-        predicate=pc.func_2000D_and_negative,
+        predicate=pc.func_2000D,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_panels=[stool_sample_panel,])
