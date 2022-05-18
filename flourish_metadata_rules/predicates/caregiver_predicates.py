@@ -1,11 +1,19 @@
 from datetime import date
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 
+from dateutil import relativedelta
 from django.apps import apps as django_apps
-from edc_base.utils import age
+from edc_base.utils import age, get_utcnow
 from edc_constants.constants import POS, YES, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
+
+from flourish_caregiver.helper_classes import MaternalStatusHelper
+
+
+def get_difference(birth_date=None):
+    difference = relativedelta.relativedelta(
+        get_utcnow().date(), birth_date)
+    return difference.years
 
 
 class CaregiverPredicates(PredicateCollection):
@@ -90,11 +98,12 @@ class CaregiverPredicates(PredicateCollection):
             except registered_model.DoesNotExist:
                 raise
             else:
-                child_age = age(registered_child.dob, visit.report_datetime)
-                child_age = float(f'{child_age.years}.{child_age.months}')
+                if registered_child.dob:
+                    child_age = age(registered_child.dob, visit.report_datetime)
+                    child_age = float(f'{child_age.years}.{child_age.months}')
 
-                if (child_age <= 15.9 and child_age >= 10):
-                    return [True, child_subject_identifier]
+                    if (child_age <= 15.9 and child_age >= 10):
+                        return [True, child_subject_identifier]
         return [False, child_subject_identifier]
 
     def prior_participation(self, visit=None, **kwargs):
@@ -126,7 +135,7 @@ class CaregiverPredicates(PredicateCollection):
         consent_cls = django_apps.get_model(f'{self.app_label}.subjectconsent')
 
         consent_obj = consent_cls.objects.filter(
-            subject_identifier=visit.subject_identifier,).latest('created')
+            subject_identifier=visit.subject_identifier, ).latest('created')
 
         return consent_obj.biological_caregiver == YES
 
@@ -140,7 +149,8 @@ class CaregiverPredicates(PredicateCollection):
             visit=visit)
                 and maternal_status_helper.hiv_status == POS)
 
-    def func_bio_mothers_hiv_cohort_a(self, visit=None, maternal_status_helper=None, **kwargs):
+    def func_bio_mothers_hiv_cohort_a(self, visit=None, maternal_status_helper=None,
+            **kwargs):
         """Returns true if participant is biological mother living with HIV.
         """
 
@@ -227,7 +237,7 @@ class CaregiverPredicates(PredicateCollection):
 
     def func_show_hiv_test_form(
             self, visit=None, maternal_status_helper=None, **kwargs
-            ):
+    ):
         subject_identifier = visit.subject_identifier
         result_date = None
 
@@ -257,4 +267,74 @@ class CaregiverPredicates(PredicateCollection):
 
                     if result_date and isinstance(result_date[0], date):
                         return (visit.report_datetime.date() - result_date[0]).days > 90
+        return False
+
+    def tb_eligible(self, visit=None, maternal_status_helper=None, **kwargs):
+        consent_model = 'subjectconsent'
+        tb_consent_model = 'tbinformedconsent'
+        antenatal_enrollment_model = 'antenatalenrollment'
+        maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
+            visit)
+        prev_tb_study_screening = Reference.objects.filter(
+            model=f'{self.app_label}.tbstudyscreening',
+            report_datetime__lt=visit.report_datetime,
+            identifier=visit.subject_identifier).order_by(
+            '-report_datetime').last()
+        consent_model_cls = django_apps.get_model(f'flourish_caregiver.{consent_model}')
+        antenatal_enrollment_model_cls = django_apps.get_model(
+            f'flourish_caregiver.{antenatal_enrollment_model}')
+        tb_consent_model_cls = django_apps.get_model(
+            f'flourish_caregiver.{tb_consent_model}')
+        consent_obj = consent_model_cls.objects.filter(
+            subject_identifier=visit.subject_identifier
+        )
+        child_subjects = list(consent_obj[0].caregiverchildconsent_set.all().values_list(
+            'subject_identifier', flat=True))
+        try:
+            tb_consent_model_cls.objects.get(subject_identifier=visit.subject_identifier)
+        except tb_consent_model_cls.DoesNotExist:
+            if (consent_obj and get_difference(consent_obj[0].dob)
+                    >= 18 and maternal_status_helper.hiv_status == POS and
+                    consent_obj[0].citizen == YES and not prev_tb_study_screening):
+                for child_subj in child_subjects:
+                    try:
+                        antenatal_enrolment_obj = antenatal_enrollment_model_cls.objects.get(
+                            subject_identifier=visit.subject_identifier)
+                    except antenatal_enrollment_model_cls.DoesNotExist:
+                        child_consent = consent_obj[0].caregiverchildconsent_set.get(
+                            subject_identifier=child_subj)
+                        child_age = age(child_consent.child_dob, get_utcnow())
+                        child_age_in_months = (
+                                                      child_age.years * 12) + child_age.months
+                        if child_age_in_months < 2:
+                            return True
+                    else:
+                        if (antenatal_enrolment_obj.ga_lmp_anc_wks and int(
+                                antenatal_enrolment_obj.ga_lmp_anc_wks) >= 22):
+                            return True
+            else:
+                return False
+        else:
+            return False
+
+    def tb_off_schedule(self, visit=None, maternal_status_helper=None, **kwargs):
+        visit_screening_cls = django_apps.get_model(
+            'flourish_caregiver.tbvisitscreeningwomen')
+        try:
+            visit_screening = visit_screening_cls.objects.get(
+                maternal_visit=visit
+            )
+        except visit_screening_cls.DoesNotExist:
+            pass
+        else:
+            take_off_schedule = (
+                    visit_screening.have_cough == YES or
+                    visit_screening.cough_duration == '=>2 week' or
+                    visit_screening.fever == YES or
+                    visit_screening.night_sweats == YES or
+                    visit_screening.weight_loss == YES or
+                    visit_screening.cough_blood == YES or
+                    visit_screening.enlarged_lymph_nodes == YES
+            )
+            return not take_off_schedule
         return False
