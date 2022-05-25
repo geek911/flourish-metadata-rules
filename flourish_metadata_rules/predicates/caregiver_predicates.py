@@ -272,7 +272,7 @@ class CaregiverPredicates(PredicateCollection):
     def tb_eligible(self, visit=None, maternal_status_helper=None, **kwargs):
         consent_model = 'subjectconsent'
         tb_consent_model = 'tbinformedconsent'
-        antenatal_enrollment_model = 'antenatalenrollment'
+        ultrasound_model = 'ultrasound'
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             visit)
         prev_tb_study_screening = Reference.objects.filter(
@@ -281,8 +281,8 @@ class CaregiverPredicates(PredicateCollection):
             identifier=visit.subject_identifier).order_by(
             '-report_datetime').last()
         consent_model_cls = django_apps.get_model(f'flourish_caregiver.{consent_model}')
-        antenatal_enrollment_model_cls = django_apps.get_model(
-            f'flourish_caregiver.{antenatal_enrollment_model}')
+        ultrasound_model_cls = django_apps.get_model(
+            f'flourish_caregiver.{ultrasound_model}')
         tb_consent_model_cls = django_apps.get_model(
             f'flourish_caregiver.{tb_consent_model}')
         consent_obj = consent_model_cls.objects.filter(
@@ -298,19 +298,18 @@ class CaregiverPredicates(PredicateCollection):
                     consent_obj[0].citizen == YES and not prev_tb_study_screening):
                 for child_subj in child_subjects:
                     try:
-                        antenatal_enrolment_obj = antenatal_enrollment_model_cls.objects.get(
+                        ultrasound_obj = ultrasound_model_cls.objects.get(
                             subject_identifier=visit.subject_identifier)
-                    except antenatal_enrollment_model_cls.DoesNotExist:
+                    except ultrasound_model_cls.DoesNotExist:
                         child_consent = consent_obj[0].caregiverchildconsent_set.get(
                             subject_identifier=child_subj)
                         child_age = age(child_consent.child_dob, get_utcnow())
-                        child_age_in_months = (
-                                                      child_age.years * 12) + child_age.months
+                        child_age_in_months = (child_age.years * 12) + child_age.months
                         if child_age_in_months < 2:
                             return True
                     else:
-                        if (antenatal_enrolment_obj.ga_lmp_anc_wks and int(
-                                antenatal_enrolment_obj.ga_lmp_anc_wks) >= 22):
+                        breakpoint()
+                        if ultrasound_obj.ga_confirmed and ultrasound_obj.ga_confirmed >= 22:
                             return True
             else:
                 return False
