@@ -308,7 +308,6 @@ class CaregiverPredicates(PredicateCollection):
                         if child_age_in_months < 2:
                             return True
                     else:
-                        breakpoint()
                         if ultrasound_obj.ga_confirmed and ultrasound_obj.ga_confirmed >= 22:
                             return True
             else:
