@@ -73,7 +73,6 @@ class ChildPredicates(PredicateCollection):
         """
         Returns true if the visit is 1000 or 200D and the caregiver is pos
         """
-        import pdb; pdb.set_trace()
         caregiver_child_consent_cls = django_apps.get_model(
                 f'{self.maternal_app_label}.caregiverchildconsent')
         try:
