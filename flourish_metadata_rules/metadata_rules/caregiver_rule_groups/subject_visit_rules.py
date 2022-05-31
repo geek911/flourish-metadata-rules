@@ -85,7 +85,7 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         predicate=pc.tb_eligible,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.tbstudyscreening', ])
+        target_models=[f'{app_label}.screentotbstudy', ])
 
     tb_off_schedule = CrfRule(
         predicate=pc.tb_off_schedule,
