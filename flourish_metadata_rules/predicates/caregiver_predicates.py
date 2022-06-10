@@ -269,7 +269,7 @@ class CaregiverPredicates(PredicateCollection):
                         return (visit.report_datetime.date() - result_date[0]).days > 90
         return False
 
-    def tb_eligible(self, visit=None, maternal_status_helper=None, **kwargs):
+    def func_tb_eligible(self, visit=None, maternal_status_helper=None, **kwargs):
         consent_model = 'subjectconsent'
         tb_consent_model = 'tbinformedconsent'
         ultrasound_model = 'ultrasound'
@@ -305,7 +305,8 @@ class CaregiverPredicates(PredicateCollection):
                             subject_identifier=child_subj)
                         if child_consent.child_dob:
                             child_age = age(child_consent.child_dob, get_utcnow())
-                            child_age_in_months = (child_age.years * 12) + child_age.months
+                            child_age_in_months = (
+                                                              child_age.years * 12) + child_age.months
                             if child_age_in_months < 2:
                                 return True
                         else:
@@ -318,7 +319,7 @@ class CaregiverPredicates(PredicateCollection):
         else:
             return False
 
-    def tb_off_schedule(self, visit=None, maternal_status_helper=None, **kwargs):
+    def func_tb_referral(self, visit=None, **kwargs):
         visit_screening_cls = django_apps.get_model(
             'flourish_caregiver.tbvisitscreeningwomen')
         try:
@@ -326,7 +327,7 @@ class CaregiverPredicates(PredicateCollection):
                 maternal_visit=visit
             )
         except visit_screening_cls.DoesNotExist:
-            pass
+            return False
         else:
             take_off_schedule = (
                     visit_screening.have_cough == YES or
@@ -337,5 +338,4 @@ class CaregiverPredicates(PredicateCollection):
                     visit_screening.cough_blood == YES or
                     visit_screening.enlarged_lymph_nodes == YES
             )
-            return not take_off_schedule
-        return False
+            return take_off_schedule

@@ -82,17 +82,10 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         target_models=[f'{app_label}.hivrapidtestcounseling', ])
 
     tb_eligible = CrfRule(
-        predicate=pc.tb_eligible,
+        predicate=pc.func_tb_eligible,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.tbstudyeligibility', ])
-
-    tb_off_schedule = CrfRule(
-        predicate=pc.tb_off_schedule,
-        consequence=REQUIRED,
-        alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.tboffstudy', ])
-
 
     class Meta:
         app_label = app_label
