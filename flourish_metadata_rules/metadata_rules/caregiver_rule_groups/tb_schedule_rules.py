@@ -9,11 +9,11 @@ pc = CaregiverPredicates()
 
 @register()
 class TbScheduleRuleGroup(CrfRuleGroup):
-    tb_off_schedule = CrfRule(
-        predicate=pc.tb_off_schedule,
+    tb_referral = CrfRule(
+        predicate=pc.func_tb_referral,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.tboffstudy', ])
+        target_models=[f'{app_label}.tbreferral', ])
 
 
     class Meta:

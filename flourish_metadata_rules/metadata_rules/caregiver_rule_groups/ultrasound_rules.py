@@ -10,7 +10,7 @@ pc = CaregiverPredicates()
 @register()
 class UltrasoundRuleGroup(CrfRuleGroup):
     tb_eligible = CrfRule(
-        predicate=pc.tb_eligible,
+        predicate=pc.func_tb_eligible,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.tbstudyeligibility', ])
