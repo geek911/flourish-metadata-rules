@@ -273,12 +273,14 @@ class CaregiverPredicates(PredicateCollection):
         consent_model = 'subjectconsent'
         tb_consent_model = 'tbinformedconsent'
         ultrasound_model = 'ultrasound'
-        tb_eligibility_model = 'tbstudyeligibility'
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             visit)
+        prev_tb_study_screening = self.exists(
+            reference_name=f'{self.app_label}.tbstudyeligibility',
+            subject_identifier=visit.subject_identifier,
+            field_name='tb_participation',
+            value=YES)
         consent_model_cls = django_apps.get_model(f'flourish_caregiver.{consent_model}')
-        tb_eligibility_cls = django_apps.get_model(
-            f'flourish_caregiver.{tb_eligibility_model}')
         ultrasound_model_cls = django_apps.get_model(
             f'flourish_caregiver.{ultrasound_model}')
         tb_consent_model_cls = django_apps.get_model(
@@ -286,8 +288,6 @@ class CaregiverPredicates(PredicateCollection):
         consent_obj = consent_model_cls.objects.filter(
             subject_identifier=visit.subject_identifier
         )
-        tb_eligibility_objs = tb_eligibility_cls.objects.filter(
-            maternal_visit__subject_identifier=visit.subject_identifier).count()
         child_subjects = list(consent_obj[0].caregiverchildconsent_set.all().values_list(
             'subject_identifier', flat=True))
         try:
@@ -295,7 +295,7 @@ class CaregiverPredicates(PredicateCollection):
         except tb_consent_model_cls.DoesNotExist:
             if (consent_obj and get_difference(consent_obj[0].dob)
                     >= 18 and maternal_status_helper.hiv_status == POS and
-                    consent_obj[0].citizen == YES and (tb_eligibility_objs < 0)):
+                    consent_obj[0].citizen == YES and len(prev_tb_study_screening) == 0):
                 for child_subj in child_subjects:
                     try:
                         ultrasound_obj = ultrasound_model_cls.objects.get(
