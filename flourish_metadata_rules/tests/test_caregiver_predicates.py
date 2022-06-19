@@ -47,6 +47,9 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
         self.reference_helper.create_visit(
             report_datetime=report_datetime + relativedelta(days=3),
             timepoint='3000M')
+        self.reference_helper.create_visit(
+            report_datetime=report_datetime + relativedelta(days=2),
+            timepoint='2002M')
         import_holidays()
 
     def test_func_preg_no_prior_participation(self):
@@ -165,6 +168,16 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
 
         self.assertTrue(
             pc.func_LWHIV_aged_10_15a(self.maternal_visits[0], ))
+        
+      
+    def test_func_b_feeding(self):
+        pc = CaregiverPredicates()
+        pc.app_label = self.app_label
+        
+        AntenatalEnrollment.objects.create(subject_identifier=self.subject_identifier)
+        self.assertTrue(pc.func_show_b_feeding_form(self.maternal_visits[2], ))
+        
+            
 
     @property
     def maternal_visits(self):

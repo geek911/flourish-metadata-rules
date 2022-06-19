@@ -81,6 +81,12 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.hivrapidtestcounseling', ])
 
+    breast_feeding = CrfRule(
+        predicate=pc.func_show_b_feeding_form,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.breastfeedingquestionnaire', ])
+
     class Meta:
         app_label = app_label
         source_model = f'{app_label}.maternalvisit'
