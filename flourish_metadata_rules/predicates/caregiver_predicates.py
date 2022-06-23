@@ -339,3 +339,10 @@ class CaregiverPredicates(PredicateCollection):
                     visit_screening.enlarged_lymph_nodes == YES
             )
             return take_off_schedule
+
+    def func_show_b_feeding_form(self, visit=None, **kwargs):
+
+        """
+        Returns true if the visit is 2002M and the caregiver breastfeeding
+        """
+        return visit.visit_code == '2002M' and self.enrolled_pregnant(visit=visit)
