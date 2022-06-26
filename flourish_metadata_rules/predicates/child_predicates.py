@@ -1,11 +1,10 @@
-from flourish_caregiver.helper_classes import MaternalStatusHelper
-
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES, POS, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
+from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -71,7 +70,7 @@ class ChildPredicates(PredicateCollection):
     def version_2_1(self, visit=None, **kwargs):
 
         """
-        Returns true if the visit is 1000 or 200D and the caregiver is pos
+        Returns true if the participant is enrolled under version 2.1 and is a delivery visit
         """
         caregiver_child_consent_cls = django_apps.get_model(
                 f'{self.maternal_app_label}.caregiverchildconsent')
