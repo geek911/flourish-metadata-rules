@@ -1,4 +1,5 @@
 from datetime import date
+from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 from dateutil import relativedelta
 from django.apps import apps as django_apps
@@ -6,8 +7,6 @@ from edc_base.utils import age, get_utcnow
 from edc_constants.constants import POS, YES, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
-
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 def get_difference(birth_date=None):
@@ -135,7 +134,7 @@ class CaregiverPredicates(PredicateCollection):
         consent_cls = django_apps.get_model(f'{self.app_label}.subjectconsent')
 
         consent_obj = consent_cls.objects.filter(
-            subject_identifier=visit.subject_identifier, ).latest('created')
+            subject_identifier=visit.subject_identifier,).latest('created')
 
         return consent_obj.biological_caregiver == YES
 
@@ -149,8 +148,8 @@ class CaregiverPredicates(PredicateCollection):
             visit=visit)
                 and maternal_status_helper.hiv_status == POS)
 
-    def func_bio_mothers_hiv_cohort_a(self, visit=None, maternal_status_helper=None,
-            **kwargs):
+    def func_bio_mothers_hiv_cohort_a(self, visit=None,
+                                      maternal_status_helper=None, **kwargs):
         """Returns true if participant is biological mother living with HIV.
         """
 
@@ -301,12 +300,12 @@ class CaregiverPredicates(PredicateCollection):
                         ultrasound_obj = ultrasound_model_cls.objects.get(
                             subject_identifier=visit.subject_identifier)
                     except ultrasound_model_cls.DoesNotExist:
-                        child_consent = consent_obj[0].caregiverchildconsent_set.get(
-                            subject_identifier=child_subj)
+                        child_consent = consent_obj[0].caregiverchildconsent_set.filter(
+                            subject_identifier=child_subj).latest('consent_datetime')
                         if child_consent.child_dob:
                             child_age = age(child_consent.child_dob, get_utcnow())
-                            child_age_in_months = (
-                                                          child_age.years * 12) + child_age.months
+                            child_age_in_months = (child_age.years * 12) + child_age.months
+
                             if child_age_in_months < 2:
                                 return True
                         else:
