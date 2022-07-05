@@ -242,30 +242,33 @@ class CaregiverPredicates(PredicateCollection):
 
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             visit)
+        
+        bio_mother = self.func_bio_mother(visit=visit)
 
         if maternal_status_helper.hiv_status != POS:
             if self.currently_pregnant(visit=visit) and visit.visit_code == '1000M':
                 return True
-            elif (maternal_status_helper.hiv_status == NEG
-                  and not self.currently_pregnant(visit=visit)
-                  and visit.visit_code == '2000M'):
-                return True
-            else:
-                prev_rapid_test = Reference.objects.filter(
-                    model=f'{self.app_label}.hivrapidtestcounseling',
-                    report_datetime__lt=visit.report_datetime,
-                    identifier=subject_identifier).order_by(
-                    '-report_datetime').last()
+            elif bio_mother:
+                if (maternal_status_helper.hiv_status == NEG
+                        and visit.visit_code == '2000M'
+                        and not self.currently_pregnant(visit=visit)):
+                    return True
+                else:
+                    prev_rapid_test = Reference.objects.filter(
+                        model=f'{self.app_label}.hivrapidtestcounseling',
+                        report_datetime__lt=visit.report_datetime,
+                        identifier=subject_identifier).order_by(
+                        '-report_datetime').last()
 
-                if prev_rapid_test:
-                    result_date = self.exists(
-                        reference_name=f'{self.app_label}.hivrapidtestcounseling',
-                        subject_identifier=visit.subject_identifier,
-                        report_datetime=prev_rapid_test.report_datetime,
-                        field_name='result_date')
+                    if prev_rapid_test and bio_mother:
+                        result_date = self.exists(
+                            reference_name=f'{self.app_label}.hivrapidtestcounseling',
+                            subject_identifier=visit.subject_identifier,
+                            report_datetime=prev_rapid_test.report_datetime,
+                            field_name='result_date')
 
-                    if result_date and isinstance(result_date[0], date):
-                        return (visit.report_datetime.date() - result_date[0]).days > 90
+                        if result_date and isinstance(result_date[0], date):
+                            return (visit.report_datetime.date() - result_date[0]).days > 90
         return False
 
     def func_tb_eligible(self, visit=None, maternal_status_helper=None, **kwargs):
