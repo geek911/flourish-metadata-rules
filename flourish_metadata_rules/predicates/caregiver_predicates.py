@@ -305,17 +305,16 @@ class CaregiverPredicates(PredicateCollection):
                     except ultrasound_model_cls.DoesNotExist:
                         return False
                     else:
-                        if ultrasound_obj.get_current_ga and ultrasound_obj.get_current_ga >= 22:
-                            return True
-                        else:
-                            child_consent = consent_obj[0].caregiverchildconsent_set.get(
-                                subject_identifier=child_subj)
-                            if child_consent.child_dob:
-                                child_age = age(child_consent.child_dob, get_utcnow())
-                                child_age_in_months = (child_age.years * 12) + child_age.months
-                                if child_age_in_months < 2:
-                                    return True
-                            return visit.visit_code == '2000D'
+                        child_consent = consent_obj[0].caregiverchildconsent_set.get(
+                            subject_identifier=child_subj)
+                        if child_consent.child_dob:
+                            child_age = age(child_consent.child_dob, get_utcnow())
+                            child_age_in_months = (child_age.years * 12) + child_age.months
+                            if child_age_in_months < 2:
+                                return True
+                            elif not child_age_in_months:
+                                return ultrasound_obj.get_current_ga and ultrasound_obj.get_current_ga >= 22
+                        return visit.visit_code == '2000D'
             else:
                 return False
         else:
