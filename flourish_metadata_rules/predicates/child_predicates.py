@@ -1,10 +1,11 @@
+from flourish_caregiver.helper_classes import MaternalStatusHelper
+
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES, POS, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -86,14 +87,14 @@ class ChildPredicates(PredicateCollection):
     def get_child_age(self, visit=None, **kwargs):
         """Returns child age
         """
-        if not self.mother_pregnant(visit=visit):
-            caregiver_child_consent_cls = django_apps.get_model(
-                f'{self.maternal_app_label}.caregiverchildconsent')
-            consents = caregiver_child_consent_cls.objects.filter(
-                subject_identifier=visit.subject_identifier)
-            if consents:
-                caregiver_child_consent = consents.latest('consent_datetime')
-                return age(caregiver_child_consent.child_dob, visit.report_datetime)
+
+        caregiver_child_consent_cls = django_apps.get_model(
+            f'{self.maternal_app_label}.caregiverchildconsent')
+        consents = caregiver_child_consent_cls.objects.filter(
+            subject_identifier=visit.subject_identifier)
+        if consents:
+            caregiver_child_consent = consents.latest('consent_datetime')
+            return age(caregiver_child_consent.child_dob, visit.report_datetime)
 
     def child_age_at_enrolment(self, visit):
         if not self.mother_pregnant(visit=visit) \
