@@ -242,7 +242,7 @@ class CaregiverPredicates(PredicateCollection):
 
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             visit)
-        
+
         bio_mother = self.func_bio_mother(visit=visit)
 
         if maternal_status_helper.hiv_status != POS:
@@ -305,8 +305,8 @@ class CaregiverPredicates(PredicateCollection):
                     except ultrasound_model_cls.DoesNotExist:
                         return False
                     else:
-                        child_consent = consent_obj[0].caregiverchildconsent_set.get(
-                            subject_identifier=child_subj)
+                        child_consent = consent_obj[0].caregiverchildconsent_set.filter(
+                            subject_identifier=child_subj).latest('consent_datetime')
                         if child_consent.child_dob:
                             child_age = age(child_consent.child_dob, get_utcnow())
                             child_age_in_months = (child_age.years * 12) + child_age.months
