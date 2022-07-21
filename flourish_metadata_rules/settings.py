@@ -22,6 +22,9 @@ APP_NAME = 'flourish_metadata_rules'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
+DEVICE_ID = 99
+DEVICE_ROLE = 'Client'
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'ro4b$%+d-ul0ks=3k&ljgd0i2e-*0ou1zorc*#rmxq_9d(49ut'
 
@@ -51,6 +54,7 @@ INSTALLED_APPS = [
     'edc_protocol.apps.AppConfig',
     'edc_timepoint.apps.AppConfig',
     'edc_reference.apps.AppConfig',
+    'edc_senaite_interface.apps.AppConfig',
     'pre_flourish.apps.AppConfig',
     'flourish_caregiver.apps.AppConfig',
     'flourish_child.apps.AppConfig',
@@ -160,4 +164,3 @@ if 'test' in sys.argv:
     MIGRATION_MODULES = DisableMigrations()
     PASSWORD_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher',)
     DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'
-

@@ -9,3 +9,5 @@ from .child_rule_groups import ChildSocioDemographicRuleGroup
 from .child_rule_groups import ChildVisitRuleGroup
 from .child_rule_groups import CongenitalAnomaliesRuleGroup
 from .child_rule_groups import ChildVisitReqRuleGroup
+from .caregiver_rule_groups import TbScheduleRuleGroup
+from .caregiver_rule_groups import UltrasoundRuleGroup

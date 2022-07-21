@@ -30,10 +30,8 @@ git+https://github.com/botswana-harvard/edc-visit-tracking.git@develop#egg=edc_v
 git+https://github.com/flourishbhp/flourish-prn.git@develop#egg=flourish_prn
 git+https://github.com/flourishbhp/flourish-reference@develop#egg=flourish_reference
 git+https://github.com/flourishbhp/pre-flourish.git@develop#egg=pre_flourish
--e /Users/mcturner/source/flourish-project-files/flourish-child
--e /Users/mcturner/source/flourish-project-files/flourish-caregiver
--e /Users/mcturner/source/flourish-project-files/flourish-child-validations
--e /Users/mcturner/source/flourish-project-files/flourish-form-validations
--e /Users/mcturner/source/flourish-project-files/flourish-child-validations
--e /Users/mcturner/source/flourish-project-files/flourish-visit-schedule
-
+git+https://github.com/flourishbhp/flourish-child.git@develop#egg=flourish_child
+git+https://github.com/flourishbhp/flourish-caregiver.git@develop#egg=flourish_caregiver
+git+https://github.com/flourishbhp/flourish-child-validations.git@develop#egg=flourish_child_validations
+git+https://github.com/flourishbhp/flourish-form-validations.git@develop#egg=flourish_form_validations
+git+https://github.com/flourishbhp/flourish-visit-schedule.git@develop#egg=flourish_visit_schedule
