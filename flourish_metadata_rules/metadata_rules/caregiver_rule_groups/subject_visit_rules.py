@@ -1,5 +1,6 @@
 from edc_metadata import NOT_REQUIRED, REQUIRED
 from edc_metadata_rules import CrfRule, CrfRuleGroup, register
+
 from ...predicates import CaregiverPredicates
 
 app_label = 'flourish_caregiver'
@@ -8,7 +9,6 @@ pc = CaregiverPredicates()
 
 @register()
 class MaternalVisitRuleGroup(CrfRuleGroup):
-
     preg_prior = CrfRule(
         predicate=pc.enrolled_pregnant,
         consequence=REQUIRED,
@@ -88,6 +88,18 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.hivrapidtestcounseling', ])
+
+    tb_eligible = CrfRule(
+        predicate=pc.func_tb_eligible,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.tbstudyeligibility', ])
+
+    breast_feeding = CrfRule(
+        predicate=pc.func_show_b_feeding_form,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.breastfeedingquestionnaire', ])
 
     class Meta:
         app_label = app_label

@@ -1,11 +1,11 @@
+from flourish_caregiver.helper_classes import MaternalStatusHelper
+
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES, POS, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
-
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -68,17 +68,33 @@ class ChildPredicates(PredicateCollection):
                 return True
         return False
 
+    def version_2_1(self, visit=None, **kwargs):
+
+        """
+        Returns true if the participant is enrolled under version 2.1 and is a delivery visit
+        """
+        caregiver_child_consent_cls = django_apps.get_model(
+                f'{self.maternal_app_label}.caregiverchildconsent')
+        try:
+            caregiver_child_consent_cls.objects.get(
+                subject_identifier=visit.subject_identifier,
+                version='2.1')
+        except caregiver_child_consent_cls.DoesNotExist:
+            return False
+        else:
+            return visit.visit_code == '2000D'
+
     def get_child_age(self, visit=None, **kwargs):
         """Returns child age
         """
-        if not self.mother_pregnant(visit=visit):
-            caregiver_child_consent_cls = django_apps.get_model(
-                f'{self.maternal_app_label}.caregiverchildconsent')
-            consents = caregiver_child_consent_cls.objects.filter(
-                subject_identifier=visit.subject_identifier)
-            if consents:
-                caregiver_child_consent = consents.latest('consent_datetime')
-                return age(caregiver_child_consent.child_dob, visit.report_datetime)
+
+        caregiver_child_consent_cls = django_apps.get_model(
+            f'{self.maternal_app_label}.caregiverchildconsent')
+        consents = caregiver_child_consent_cls.objects.filter(
+            subject_identifier=visit.subject_identifier)
+        if consents:
+            caregiver_child_consent = consents.latest('consent_datetime')
+            return age(caregiver_child_consent.child_dob, visit.report_datetime)
 
     def child_age_at_enrolment(self, visit):
         if not self.mother_pregnant(visit=visit) \
@@ -214,7 +230,7 @@ class ChildPredicates(PredicateCollection):
             return True
         return False
 
-    def previous_dev_screening(self, visit, model):
+    def previous_model(self, visit, model):
         return Reference.objects.filter(
             model=model,
             identifier=visit.appointment.subject_identifier,
@@ -228,8 +244,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if 6 > child_age.months >= 3 and child_age.years == 0:
             model = f'{self.app_label}.infantdevscreening3months'
-            return False if self.previous_dev_screening(visit=visit,
-                                                        model=model) else True
+            return False if self.previous_model(visit=visit,
+                                                model=model) else True
 
     def func_6_months_old(self, visit=None, **kwargs):
         """
@@ -238,8 +254,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 0 and 9 > child_age.months >= 6:
             model = f'{self.app_label}.infantdevscreening6months'
-            return False if self.previous_dev_screening(visit=visit,
-                                                        model=model) else True
+            return False if self.previous_model(visit=visit,
+                                                model=model) else True
 
     def func_9_months_old(self, visit=None, **kwargs):
         """
@@ -248,8 +264,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 0 and 12 > child_age.months >= 9:
             model = f'{self.app_label}.infantdevscreening9months'
-            return False if self.previous_dev_screening(visit=visit,
-                                                        model=model) else True
+            return False if self.previous_model(visit=visit,
+                                                model=model) else True
 
     def func_12_months_old(self, visit=None, **kwargs):
         """
@@ -258,8 +274,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 1 and child_age.months < 6:
             model = f'{self.app_label}.infantdevscreening12months'
-            return False if self.previous_dev_screening(visit=visit,
-                                                        model=model) else True
+            return False if self.previous_model(visit=visit,
+                                                model=model) else True
 
     def func_18_months_old(self, visit=None, **kwargs):
         """
@@ -268,8 +284,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 1 and child_age.months >= 6:
             model = f'{self.app_label}.infantdevscreening18months'
-            return False if self.previous_dev_screening(visit=visit,
-                                                        model=model) else True
+            return False if self.previous_model(visit=visit,
+                                                model=model) else True
 
     def func_36_months_old(self, visit=None, **kwargs):
         """
@@ -278,8 +294,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 3:
             model = f'{self.app_label}.infantdevscreening36months'
-            return False if self.previous_dev_screening(visit=visit,
-                                                        model=model) else True
+            return False if self.previous_model(visit=visit,
+                                                model=model) else True
 
     def func_60_months_old(self, visit=None, **kwargs):
         """
@@ -288,8 +304,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 5:
             model = f'{self.app_label}.infantdevscreening60months'
-            return False if self.previous_dev_screening(visit=visit,
-                                                        model=model) else True
+            return False if self.previous_model(visit=visit,
+                                                model=model) else True
 
     def func_72_months_old(self, visit=None, **kwargs):
         """
@@ -298,8 +314,8 @@ class ChildPredicates(PredicateCollection):
         child_age = self.get_child_age(visit=visit)
         if child_age.years == 6:
             model = f'{self.app_label}.infantdevscreening72months'
-            return False if self.previous_dev_screening(visit=visit,
-                                                        model=model) else True
+            return False if self.previous_model(visit=visit,
+                                                model=model) else True
 
     def func_forth_eighth_quarter(self, visit=None, **kwargs):
         """
@@ -310,18 +326,28 @@ class ChildPredicates(PredicateCollection):
             f'{self.maternal_app_label}.caregiverchildconsent')
         consents = caregiver_child_consent_cls.objects.filter(
             subject_identifier=visit.subject_identifier)
+        model = f'{self.app_label}.childfoodsecurityquestionnaire'
         if child_age.years >= 3 and consents:
             caregiver_child_consent = consents.latest('consent_datetime')
-            child_is_three_at_date = caregiver_child_consent.child_dob - relativedelta(
+            child_is_three_at_date = caregiver_child_consent.child_dob + relativedelta(
                 years=3, months=0)
-            if visit.report_datetime.date() > child_is_three_at_date:
+            if visit.report_datetime.date() >= child_is_three_at_date:
                 previous_visit = Reference.objects.filter(
                     model=f'{self.app_label}.childvisit',
                     identifier=visit.appointment.subject_identifier,
-                    report_datetime__lt=visit.report_datetime).order_by(
+                    report_datetime__lte=visit.report_datetime).order_by(
                     '-report_datetime').count()
+                previous_food_sec = Reference.objects.filter(
+                    model=model,
+                    identifier=visit.appointment.subject_identifier).order_by(
+                    '-report_datetime').first()
 
-                if previous_visit != 0 and previous_visit % 4 == 0:
+                if self.previous_model(visit=visit, model=model):
+                    if (int(previous_food_sec.timepoint) - int(
+                            visit.visit_code)) % 4 == 0:
+                        return True
+                elif not self.previous_model(visit=visit,
+                                             model=model) and 0 < previous_visit:
                     return True
         return False
 
@@ -331,6 +357,6 @@ class ChildPredicates(PredicateCollection):
         Returns True if visit is 2000D
 
         """
-        
+
         return visit.visit_code == '2000D'
 
