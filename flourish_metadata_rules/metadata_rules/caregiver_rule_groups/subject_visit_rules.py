@@ -9,11 +9,12 @@ pc = CaregiverPredicates()
 
 @register()
 class MaternalVisitRuleGroup(CrfRuleGroup):
-    preg_prior = CrfRule(
-        predicate=pc.func_preg_no_prior_participation,
+    pregnant = CrfRule(
+        predicate=pc.enrolled_pregnant,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.foodsecurityquestionnaire',
+                       f'{app_label}.caregiveredinburghdeprscreening',
                        f'{app_label}.ultrasound',
                        f'{app_label}.tbhistorypreg',
                        f'{app_label}.tbscreenpreg',
@@ -21,13 +22,6 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
                        f'{app_label}.substanceusepriorpregnancy',
                        f'{app_label}.tbroutinehealthscreen', ])
     
-    pregnant_participant = CrfRule(
-        predicate = pc.enrolled_pregnant,
-        consequence=REQUIRED,
-        alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.caregiveredinburghdeprscreening',]
-    )
-
     biological_with_hiv_not_preg = CrfRule(
         predicate=pc.func_bio_mother_hiv,
         consequence=REQUIRED,
@@ -55,6 +49,7 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         target_models=[f'{app_label}.maternaldiagnoses',
                        f'{app_label}.arvsprepregnancy',
                        f'{app_label}.maternalarvduringpreg',
+                       f'{app_label}.maternalarvatdelivery',
                        f'{app_label}.maternalhivinterimhx', ])
 
     non_preg = CrfRule(
