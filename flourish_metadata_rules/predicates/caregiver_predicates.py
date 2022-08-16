@@ -313,10 +313,11 @@ class CaregiverPredicates(PredicateCollection):
                             child_age = age(child_consent.child_dob, get_utcnow())
                             child_age_in_months = (child_age.years * 12) + child_age.months
                             if child_age_in_months < 2:
-                                if tb_screening_form_objs.latest('created') \
-                                        .reasons_not_participating == 'still_thinking':
-                                    return True
-                                elif not tb_screening_form_objs:
+                                try:
+                                    if tb_screening_form_objs.latest('created') \
+                                            .reasons_not_participating == 'still_thinking':
+                                        return True
+                                except tb_screening_form_cls.DoesNotExist:
                                     return True
                         else:
                             return ultrasound_obj.get_current_ga and ultrasound_obj.get_current_ga >= 22
