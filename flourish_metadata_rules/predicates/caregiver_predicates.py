@@ -134,7 +134,7 @@ class CaregiverPredicates(PredicateCollection):
         consent_cls = django_apps.get_model(f'{self.app_label}.subjectconsent')
 
         consent_obj = consent_cls.objects.filter(
-            subject_identifier=visit.subject_identifier,).latest('created')
+            subject_identifier=visit.subject_identifier, ).latest('created')
 
         return consent_obj.biological_caregiver == YES
 
@@ -149,7 +149,7 @@ class CaregiverPredicates(PredicateCollection):
                 and maternal_status_helper.hiv_status == POS)
 
     def func_bio_mothers_hiv_cohort_a(self, visit=None,
-                                      maternal_status_helper=None, **kwargs):
+            maternal_status_helper=None, **kwargs):
         """Returns true if participant is biological mother living with HIV.
         """
 
@@ -268,20 +268,19 @@ class CaregiverPredicates(PredicateCollection):
                             field_name='result_date')
 
                         if result_date and isinstance(result_date[0], date):
-                            return (visit.report_datetime.date() - result_date[0]).days > 90
+                            return (visit.report_datetime.date() - result_date[
+                                0]).days > 90
         return False
 
     def func_tb_eligible(self, visit=None, maternal_status_helper=None, **kwargs):
         consent_model = 'subjectconsent'
         tb_consent_model = 'tbinformedconsent'
         ultrasound_model = 'ultrasound'
+        tb_screening_form = 'tbstudyeligibility'
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             visit)
-        prev_tb_study_screening = self.exists(
-            reference_name=f'{self.app_label}.tbstudyeligibility',
-            subject_identifier=visit.subject_identifier,
-            field_name='tb_participation',
-            value=YES)
+        tb_screening_form_cls = django_apps.get_model(
+            f'{self.app_label}.{tb_screening_form}')
         consent_model_cls = django_apps.get_model(f'flourish_caregiver.{consent_model}')
         ultrasound_model_cls = django_apps.get_model(
             f'flourish_caregiver.{ultrasound_model}')
@@ -290,6 +289,8 @@ class CaregiverPredicates(PredicateCollection):
         consent_obj = consent_model_cls.objects.filter(
             subject_identifier=visit.subject_identifier
         )
+        tb_screening_form_objs = tb_screening_form_cls.objects.filter(
+            maternal_visit__subject_identifier=visit.subject_identifier)
         child_subjects = list(consent_obj[0].caregiverchildconsent_set.all().values_list(
             'subject_identifier', flat=True))
         try:
@@ -297,7 +298,7 @@ class CaregiverPredicates(PredicateCollection):
         except tb_consent_model_cls.DoesNotExist:
             if (consent_obj and get_difference(consent_obj[0].dob)
                     >= 18 and maternal_status_helper.hiv_status == POS and
-                    consent_obj[0].citizen == YES and len(prev_tb_study_screening) == 0):
+                    consent_obj[0].citizen == YES):
                 for child_subj in child_subjects:
                     try:
                         ultrasound_obj = ultrasound_model_cls.objects.get(
@@ -307,14 +308,19 @@ class CaregiverPredicates(PredicateCollection):
                     else:
                         child_consent = consent_obj[0].caregiverchildconsent_set.filter(
                             subject_identifier=child_subj).latest('consent_datetime')
-                        if child_consent.child_dob:
+                        if (visit.visit_code == '2000D' or visit.visit_code == '2001M') \
+                                and child_consent.child_dob:
                             child_age = age(child_consent.child_dob, get_utcnow())
                             child_age_in_months = (child_age.years * 12) + child_age.months
                             if child_age_in_months < 2:
-                                return True
-                            elif not child_age_in_months:
-                                return ultrasound_obj.get_current_ga and ultrasound_obj.get_current_ga >= 22
-                        return visit.visit_code == '2000D'
+                                try:
+                                    last_tb_bj = tb_screening_form_objs.latest('created')
+                                except tb_screening_form_cls.DoesNotExist:
+                                    return True
+                                else:
+                                    return last_tb_bj.reasons_not_participating == 'still_thinking'
+                        else:
+                            return ultrasound_obj.get_current_ga and ultrasound_obj.get_current_ga >= 22
             else:
                 return False
         else:
