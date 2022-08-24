@@ -9,7 +9,6 @@ pc = CaregiverPredicates()
 
 @register()
 class MaternalVisitRuleGroup(CrfRuleGroup):
-    
     pregnant = CrfRule(
         predicate=pc.enrolled_pregnant,
         consequence=REQUIRED,
@@ -50,6 +49,7 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         target_models=[f'{app_label}.maternaldiagnoses',
                        f'{app_label}.arvsprepregnancy',
                        f'{app_label}.maternalarvduringpreg',
+                       f'{app_label}.maternalarvatdelivery',
                        f'{app_label}.maternalhivinterimhx', ])
 
     non_preg = CrfRule(
