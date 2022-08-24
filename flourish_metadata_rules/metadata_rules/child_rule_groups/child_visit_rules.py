@@ -105,6 +105,12 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.childfoodsecurityquestionnaire', ])
+    
+    birth_exam = CrfRule(
+        predicate = P('is_present', 'eq', YES),
+        consequence = REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.birthexam',])
 
     class Meta:
         app_label = app_label
