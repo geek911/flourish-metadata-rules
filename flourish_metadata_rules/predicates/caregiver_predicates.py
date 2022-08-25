@@ -32,8 +32,9 @@ class CaregiverPredicates(PredicateCollection):
         """
         Returns true if the visit is 1000 or 200D and the caregiver is pos
         """
-        return self.func_hiv_positive(visit=visit) and visit.visit_code in ['1000M',
-                                                                            '2000D']
+        return (self.func_hiv_positive(visit=visit)
+                and visit.visit_code in ['1000M', '2000D']
+                and visit.visit_code_sequence == 0)
 
     def enrolled_pregnant(self, visit=None, **kwargs):
         """Returns true if expecting
