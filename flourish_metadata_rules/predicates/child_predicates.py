@@ -338,9 +338,9 @@ class ChildPredicates(PredicateCollection):
                     '-report_datetime').first()
                     
                 if self.previous_model(visit=visit, model=model):  
-                    if (int(previous_food_sec.timepoint) - int(
-                            visit.visit_code)) % 4 == 0:
-                        return True
+                    return (int(previous_food_sec.timepoint) - int(
+                            visit.visit_code)) % 4 == 0
+                        
         return False
 
     def func_2000D(self, visit, **kwargs):
