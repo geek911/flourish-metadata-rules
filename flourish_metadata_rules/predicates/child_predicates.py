@@ -317,38 +317,30 @@ class ChildPredicates(PredicateCollection):
 
         caregiver_child_consent_cls = django_apps.get_model(
             f'{self.maternal_app_label}.caregiverchildconsent')
-
+        
         consents = caregiver_child_consent_cls.objects.filter(
             subject_identifier=visit.subject_identifier)
-
+        
         model = f'{self.app_label}.childfoodsecurityquestionnaire'
-
+        
         if child_age.years >= 3 and consents:
 
             caregiver_child_consent = consents.latest('consent_datetime')
+            
             child_is_three_at_date = caregiver_child_consent.child_dob + relativedelta(
                 years=3, months=0)
-
+            
             if visit.report_datetime.date() >= child_is_three_at_date:
-
-                previous_visit = Reference.objects.filter(
-                    model=f'{self.app_label}.childvisit',
-                    identifier=visit.appointment.subject_identifier,
-                    report_datetime__lte=visit.report_datetime).order_by(
-                    '-report_datetime').count()
-
+                
                 previous_food_sec = Reference.objects.filter(
                     model=model,
                     identifier=visit.appointment.subject_identifier).order_by(
                     '-report_datetime').first()
-
-                if self.previous_model(visit=visit, model=model):
-                    if (int(previous_food_sec.timepoint) - int(
-                            visit.visit_code)) % 4 == 0:
-                        return True
-                elif not self.previous_model(visit=visit,
-                                             model=model) and 0 < previous_visit:
-                    return True
+                    
+                if self.previous_model(visit=visit, model=model):  
+                    return (int(previous_food_sec.timepoint) - int(
+                            visit.visit_code)) % 4 == 0
+                        
         return False
 
     def func_2000D(self, visit, **kwargs):
