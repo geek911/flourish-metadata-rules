@@ -203,7 +203,7 @@ class TestMaternalPredicates(SiteTestCaseMixin, TestCase):
         HivRapidTestCounseling.objects.create(maternal_visit=maternal_visit,
                                               subject_identifier=self.subject_identifier,
                                               result=NEG)
-        breakpoint()
+
         self.assertTrue(
             pc.func_show_hiv_test_form(visit=self.maternal_visits[0], ))        
 
