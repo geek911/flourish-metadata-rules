@@ -332,11 +332,6 @@ class ChildPredicates(PredicateCollection):
             
             if visit.report_datetime.date() >= child_is_three_at_date:
                 
-                previous_food_sec = Reference.objects.filter(
-                    model=model,
-                    identifier=visit.appointment.subject_identifier).order_by(
-                    '-report_datetime').first()
-                                       
                 return int(visit.visit_code) % 4 == 0 
                                                 
         return False
