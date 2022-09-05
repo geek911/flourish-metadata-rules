@@ -336,10 +336,14 @@ class ChildPredicates(PredicateCollection):
                     model=model,
                     identifier=visit.appointment.subject_identifier).order_by(
                     '-report_datetime').first()
-                    
-                if self.previous_model(visit=visit, model=model):  
+                             
+                if not self.previous_model(visit=visit, model=model) and (int(visit.visit_code) % 4 == 0):
+                    return True    
+                        
+                elif self.previous_model(visit=visit, model=model):
                     return (int(previous_food_sec.timepoint) - int(
                             visit.visit_code)) % 4 == 0
+                        
                         
         return False
 
