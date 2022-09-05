@@ -93,6 +93,14 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.breastfeedingquestionnaire', ])
+    
+    # father involvement
+    father_involvement = CrfRule(
+        predicate=pc.func_show_father_involvement,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.relationshipfatherinvolvement', ])
+    
 
     class Meta:
         app_label = app_label
