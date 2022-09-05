@@ -321,8 +321,6 @@ class ChildPredicates(PredicateCollection):
         consents = caregiver_child_consent_cls.objects.filter(
             subject_identifier=visit.subject_identifier)
         
-        model = f'{self.app_label}.childfoodsecurityquestionnaire'
-        
         if child_age.years >= 3 and consents:
 
             caregiver_child_consent = consents.latest('consent_datetime')
@@ -331,18 +329,11 @@ class ChildPredicates(PredicateCollection):
                 years=3, months=0)
             
             if visit.report_datetime.date() >= child_is_three_at_date:
-                
-                previous_food_sec = Reference.objects.filter(
-                    model=model,
-                    identifier=visit.appointment.subject_identifier).order_by(
-                    '-report_datetime').first()
                     
-                if self.previous_model(visit=visit, model=model):  
-                    return (int(previous_food_sec.timepoint) - int(
-                            visit.visit_code)) % 4 == 0
-                        
+                return int(visit.visit_code) % 4 == 0
+                                
         return False
-
+    
     def func_2000D(self, visit, **kwargs):
         """
 
