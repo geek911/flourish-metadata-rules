@@ -355,12 +355,6 @@ class CaregiverPredicates(PredicateCollection):
         """
         return visit.visit_code == '2002M' and self.enrolled_pregnant(visit=visit)
     
-    def previous_model(self, visit, model):
-        return Reference.objects.filter(
-            model=model,
-            identifier=visit.subject_identifier,
-            report_datetime__lt=visit.report_datetime).order_by(
-            '-report_datetime').first()
         
     def func_show_father_involvement(self, visit=None, maternal_status_helper=None, **kwargs):
         """
@@ -368,20 +362,11 @@ class CaregiverPredicates(PredicateCollection):
         """
         maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
             maternal_visit=visit)
-        model = f'{self.app_label}.relationshipfatherinvolvement'
-        # maternal_visit = self.visit_model
-        breakpoint()
-        bio_mother = self.func_bio_mother(visit=visit)
-        
-        if bio_mother and maternal_status_helper.hiv_status == POS:        
-            if not self.previous_model(visit=visit, model=model) and (int(visit.visit_code[:4]) % 4 == 0):
-                return True
-            elif self.previous_model(visit=visit, model=model): 
-                previous_father_involvement = Reference.objects.filter(
-                    model=model,
-                    identifier=visit.subject_identifier).order_by(
-                    '-report_datetime').first()
 
-                return (int(visit.visit_code[:4]) - int(previous_father_involvement.visit_code[:4])) % 4 == 0
-                
+        bio_mother = self.func_bio_mother(visit=visit)
+        prior_participant = self.prior_participation(visit=visit)
+        
+        if bio_mother and maternal_status_helper.hiv_status == POS or prior_participant:        
+            return int(visit.visit_code[:4]) % 4 == 0
+        
         return False
