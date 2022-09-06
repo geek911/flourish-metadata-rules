@@ -364,9 +364,8 @@ class CaregiverPredicates(PredicateCollection):
             maternal_visit=visit)
 
         bio_mother = self.func_bio_mother(visit=visit)
-        prior_participant = self.prior_participation(visit=visit)
-        
-        if bio_mother and maternal_status_helper.hiv_status == POS or prior_participant:        
+
+        if bio_mother and maternal_status_helper.hiv_status == POS:        
             return int(visit.visit_code[:4]) % 4 == 0
         
         return False
