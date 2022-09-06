@@ -354,3 +354,18 @@ class CaregiverPredicates(PredicateCollection):
         Returns true if the visit is 2002M and the caregiver breastfeeding
         """
         return visit.visit_code == '2002M' and self.enrolled_pregnant(visit=visit)
+    
+        
+    def func_show_father_involvement(self, visit=None, maternal_status_helper=None, **kwargs):
+        """
+        Returns true if the visit is the 4th annual quarterly call and the caregiver is HIV positive
+        """
+        maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
+            maternal_visit=visit)
+
+        bio_mother = self.func_bio_mother(visit=visit)
+
+        if bio_mother and maternal_status_helper.hiv_status == POS:        
+            return int(visit.visit_code[:4]) % 4 == 0
+        
+        return False
