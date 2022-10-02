@@ -1,10 +1,11 @@
+from flourish_caregiver.helper_classes import MaternalStatusHelper
+
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES, POS, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -317,23 +318,23 @@ class ChildPredicates(PredicateCollection):
 
         caregiver_child_consent_cls = django_apps.get_model(
             f'{self.maternal_app_label}.caregiverchildconsent')
-        
+
         consents = caregiver_child_consent_cls.objects.filter(
             subject_identifier=visit.subject_identifier)
-        
+
         if child_age.years >= 3 and consents:
 
             caregiver_child_consent = consents.latest('consent_datetime')
-            
+
             child_is_three_at_date = caregiver_child_consent.child_dob + relativedelta(
                 years=3, months=0)
-            
+
             if visit.report_datetime.date() >= child_is_three_at_date:
-                    
-                return int(visit.visit_code) % 4 == 0
-                                
+
+                return int(visit.visit_code[:4]) % 4 == 0
+
         return False
-    
+
     def func_2000D(self, visit, **kwargs):
         """
 
