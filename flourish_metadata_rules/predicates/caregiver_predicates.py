@@ -135,7 +135,7 @@ class CaregiverPredicates(PredicateCollection):
         consent_cls = django_apps.get_model(f'{self.app_label}.subjectconsent')
 
         consent_obj = consent_cls.objects.filter(
-            subject_identifier=visit.subject_identifier, ).latest('created')
+            subject_identifier=visit.subject_identifier,).latest('created')
 
         return consent_obj.biological_caregiver == YES
 
@@ -354,8 +354,7 @@ class CaregiverPredicates(PredicateCollection):
         Returns true if the visit is 2002M and the caregiver breastfeeding
         """
         return visit.visit_code == '2002M' and self.enrolled_pregnant(visit=visit)
-    
-        
+
     def func_show_father_involvement(self, visit=None, maternal_status_helper=None, **kwargs):
         """
         Returns true if the visit is the 4th annual quarterly call and the caregiver is HIV positive
@@ -365,7 +364,7 @@ class CaregiverPredicates(PredicateCollection):
 
         bio_mother = self.func_bio_mother(visit=visit)
 
-        if bio_mother and maternal_status_helper.hiv_status == POS:        
+        if bio_mother and maternal_status_helper.hiv_status == POS:
             return int(visit.visit_code[:4]) % 4 == 0
-        
+
         return False
