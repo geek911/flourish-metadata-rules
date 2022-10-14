@@ -1,5 +1,4 @@
 from datetime import date
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 from dateutil import relativedelta
 from django.apps import apps as django_apps
@@ -7,6 +6,8 @@ from edc_base.utils import age, get_utcnow
 from edc_constants.constants import POS, YES, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
+from flourish_caregiver.helper_classes import MaternalStatusHelper
+from numpy.core.numeric import False_
 
 
 def get_difference(birth_date=None):
@@ -135,7 +136,7 @@ class CaregiverPredicates(PredicateCollection):
         consent_cls = django_apps.get_model(f'{self.app_label}.subjectconsent')
 
         consent_obj = consent_cls.objects.filter(
-            subject_identifier=visit.subject_identifier, ).latest('created')
+            subject_identifier=visit.subject_identifier,).latest('created')
 
         return consent_obj.biological_caregiver == YES
 
@@ -150,7 +151,7 @@ class CaregiverPredicates(PredicateCollection):
                 and maternal_status_helper.hiv_status == POS)
 
     def func_bio_mothers_hiv_cohort_a(self, visit=None,
-            maternal_status_helper=None, **kwargs):
+                                      maternal_status_helper=None, **kwargs):
         """Returns true if participant is biological mother living with HIV.
         """
 
@@ -173,7 +174,17 @@ class CaregiverPredicates(PredicateCollection):
     def func_non_pregnant_caregivers(self, visit=None, **kwargs):
         """Returns true if non pregnant.
         """
-        return not self.enrolled_pregnant(visit=visit)
+        appt_model = django_apps.get_model(
+            f'edc_appointment.appointment')
+
+        try:
+            appt_obj = appt_model.objects.get(visit_code='1000M',
+                                              visit_code_sequence='0',
+                                              subject_identifier=visit.subject_identifier)
+        except appt_model.DoesNotExist:
+            return True
+        else:
+            return appt_obj.schedule_name != visit.appointment.schedule_name
 
     def func_newly_recruited(self, visit=None, **kwargs):
         cyhuu_model_cls = django_apps.get_model(
@@ -354,8 +365,7 @@ class CaregiverPredicates(PredicateCollection):
         Returns true if the visit is 2002M and the caregiver breastfeeding
         """
         return visit.visit_code == '2002M' and self.enrolled_pregnant(visit=visit)
-    
-        
+
     def func_show_father_involvement(self, visit=None, maternal_status_helper=None, **kwargs):
         """
         Returns true if the visit is the 4th annual quarterly call and the caregiver is HIV positive
@@ -365,7 +375,7 @@ class CaregiverPredicates(PredicateCollection):
 
         bio_mother = self.func_bio_mother(visit=visit)
 
-        if bio_mother and maternal_status_helper.hiv_status == POS:        
+        if bio_mother and maternal_status_helper.hiv_status == POS:
             return int(visit.visit_code[:4]) % 4 == 0
-        
+
         return False
