@@ -21,7 +21,7 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
                        f'{app_label}.tbpresencehouseholdmembers',
                        f'{app_label}.substanceusepriorpregnancy',
                        f'{app_label}.tbroutinehealthscreen', ])
-    
+
     biological_with_hiv_not_preg = CrfRule(
         predicate=pc.func_bio_mother_hiv,
         consequence=REQUIRED,
@@ -93,14 +93,13 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.breastfeedingquestionnaire', ])
-    
+
     # father involvement
     father_involvement = CrfRule(
         predicate=pc.func_show_father_involvement,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.relationshipfatherinvolvement', ])
-    
 
     class Meta:
         app_label = app_label
