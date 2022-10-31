@@ -1,4 +1,5 @@
 from datetime import date
+from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 from dateutil import relativedelta
 from django.apps import apps as django_apps
@@ -6,7 +7,6 @@ from edc_base.utils import age, get_utcnow
 from edc_constants.constants import POS, YES, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 from numpy.core.numeric import False_
 
 
@@ -125,6 +125,37 @@ class CaregiverPredicates(PredicateCollection):
         """
         return (self.enrolled_pregnant(visit=visit)
                 and not self.prior_participation(visit=visit))
+
+    def func_gad_referral_required(self, visit=None, **kwargs):
+
+        values = self.exists(
+            reference_name=f'{self.app_label}.caregivergadanxietyscreening',
+            subject_identifier=visit.subject_identifier,
+            field_name='anxiety_score')
+
+        return values and values[0] >= 10
+
+    def func_phq9_referral_required(self, visit=None, **kwargs):
+
+        phq9_cls = django_apps.get_model(f'{self.app_label}.caregiverphqdeprscreening')
+        try:
+            phq9_obj = phq9_cls.objects.get(
+                maternal_visit__subject_identifier=visit.subject_identifier)
+        except phq9_cls.DoesNotExist:
+            return False
+        else:
+            return phq9_obj.depression_score >= 5 or phq9_obj.self_harm != 0
+
+    def func_edinburgh_referral_required(self, visit=None, **kwargs):
+
+        phq9_cls = django_apps.get_model(f'{self.app_label}.caregiveredinburghdeprscreening')
+        try:
+            phq9_obj = phq9_cls.objects.get(
+                maternal_visit__subject_identifier=visit.subject_identifier)
+        except phq9_cls.DoesNotExist:
+            return False
+        else:
+            return phq9_obj.depression_score >= 10 or phq9_obj.self_harm != 0
 
     def func_caregiver_no_prior_participation(self, visit=None, **kwargs):
         """Returns true if participant is a caregiver and never participated in a BHP study.

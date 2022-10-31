@@ -1,15 +1,16 @@
 from edc_metadata import NOT_REQUIRED, REQUIRED
-from edc_metadata_rules import CrfRule, CrfRuleGroup, register, PF
+from edc_metadata_rules import CrfRule, CrfRuleGroup, register
+from ...predicates import CaregiverPredicates
 
 app_label = 'flourish_caregiver'
+pc = CaregiverPredicates()
 
 
 @register()
 class PHQ9DeprScreeningRuleGroup(CrfRuleGroup):
 
     phq_screening_referral = CrfRule(
-        predicate=PF('depression_score', 'self_harm',
-                     func=lambda score, self_harm: True if score >= 5 or self_harm != '0' else False),
+        predicate=pc.func_phq9_referral_required,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.caregiverphqreferral'])
