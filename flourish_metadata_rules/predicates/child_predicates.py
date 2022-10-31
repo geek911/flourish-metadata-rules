@@ -112,6 +112,27 @@ class ChildPredicates(PredicateCollection):
                 dummy_consent = dummy_consents.latest('consent_datetime')
                 return dummy_consent.age_at_consent
 
+    def func_gad_referral_required(self, visit=None, **kwargs):
+
+        values = self.exists(
+            reference_name=f'{self.app_label}.caregivergadanxietyscreening',
+            subject_identifier=visit.subject_identifier,
+            field_name='anxiety_score')
+
+        return values and values[0] >= 10
+
+    def func_phq9_referral_required(self, visit=None, **kwargs):
+
+        phq9_cls = django_apps.get_model(f'{self.app_label}.caregiverphqdeprscreening')
+        try:
+            phq9_obj = phq9_cls.objects.get(
+                maternal_visit__subject_identifier=visit.subject_identifier)
+        except phq9_cls.DoesNotExist:
+            return False
+        else:
+            return (phq9_obj.depression_score >= 10 or phq9_obj.self_harm != 0
+                    or phq9_obj.self_harm_thoughts == YES or phq9_obj.suidice_attempt == YES)
+
     def func_consent_study_pregnant(self, visit=None, **kwargs):
         """Returns True if participant's mother consented to the study in pregnancy
         """
