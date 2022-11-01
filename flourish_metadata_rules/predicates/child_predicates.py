@@ -1,11 +1,10 @@
-from flourish_caregiver.helper_classes import MaternalStatusHelper
-
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
-from edc_constants.constants import FEMALE, YES, POS, NEG
+from edc_constants.constants import FEMALE, YES, POS
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
+from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -115,7 +114,7 @@ class ChildPredicates(PredicateCollection):
     def func_gad_referral_required(self, visit=None, **kwargs):
 
         values = self.exists(
-            reference_name=f'{self.app_label}.caregivergadanxietyscreening',
+            reference_name=f'{self.app_label}.childgadanxietyscreening',
             subject_identifier=visit.subject_identifier,
             field_name='anxiety_score')
 
@@ -123,10 +122,10 @@ class ChildPredicates(PredicateCollection):
 
     def func_phq9_referral_required(self, visit=None, **kwargs):
 
-        phq9_cls = django_apps.get_model(f'{self.app_label}.caregiverphqdeprscreening')
+        phq9_cls = django_apps.get_model(f'{self.app_label}.childphqdepressionscreening')
         try:
             phq9_obj = phq9_cls.objects.get(
-                maternal_visit__subject_identifier=visit.subject_identifier)
+                child_visit__subject_identifier=visit.subject_identifier)
         except phq9_cls.DoesNotExist:
             return False
         else:
