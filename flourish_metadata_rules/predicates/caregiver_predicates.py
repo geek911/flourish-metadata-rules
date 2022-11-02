@@ -7,6 +7,7 @@ from edc_base.utils import age, get_utcnow
 from edc_constants.constants import POS, YES, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
+from numpy.core.numeric import False_
 
 
 def get_difference(birth_date=None):
@@ -32,8 +33,9 @@ class CaregiverPredicates(PredicateCollection):
         """
         Returns true if the visit is 1000 or 200D and the caregiver is pos
         """
-        return self.func_hiv_positive(visit=visit) and visit.visit_code in ['1000M',
-                                                                            '2000D']
+        return (self.func_hiv_positive(visit=visit)
+                and visit.visit_code in ['1000M', '2000D']
+                and visit.visit_code_sequence == 0)
 
     def enrolled_pregnant(self, visit=None, **kwargs):
         """Returns true if expecting
@@ -124,6 +126,37 @@ class CaregiverPredicates(PredicateCollection):
         return (self.enrolled_pregnant(visit=visit)
                 and not self.prior_participation(visit=visit))
 
+    def func_gad_referral_required(self, visit=None, **kwargs):
+
+        values = self.exists(
+            reference_name=f'{self.app_label}.caregivergadanxietyscreening',
+            subject_identifier=visit.subject_identifier,
+            field_name='anxiety_score')
+
+        return values and values[0] >= 10
+
+    def func_phq9_referral_required(self, visit=None, **kwargs):
+
+        phq9_cls = django_apps.get_model(f'{self.app_label}.caregiverphqdeprscreening')
+        try:
+            phq9_obj = phq9_cls.objects.get(
+                maternal_visit__subject_identifier=visit.subject_identifier)
+        except phq9_cls.DoesNotExist:
+            return False
+        else:
+            return phq9_obj.depression_score >= 5 or phq9_obj.self_harm != 0
+
+    def func_edinburgh_referral_required(self, visit=None, **kwargs):
+
+        phq9_cls = django_apps.get_model(f'{self.app_label}.caregiveredinburghdeprscreening')
+        try:
+            phq9_obj = phq9_cls.objects.get(
+                maternal_visit__subject_identifier=visit.subject_identifier)
+        except phq9_cls.DoesNotExist:
+            return False
+        else:
+            return phq9_obj.depression_score >= 10 or phq9_obj.self_harm != 0
+
     def func_caregiver_no_prior_participation(self, visit=None, **kwargs):
         """Returns true if participant is a caregiver and never participated in a BHP study.
         """
@@ -134,7 +167,7 @@ class CaregiverPredicates(PredicateCollection):
         consent_cls = django_apps.get_model(f'{self.app_label}.subjectconsent')
 
         consent_obj = consent_cls.objects.filter(
-            subject_identifier=visit.subject_identifier, ).latest('created')
+            subject_identifier=visit.subject_identifier,).latest('created')
 
         return consent_obj.biological_caregiver == YES
 
@@ -149,7 +182,7 @@ class CaregiverPredicates(PredicateCollection):
                 and maternal_status_helper.hiv_status == POS)
 
     def func_bio_mothers_hiv_cohort_a(self, visit=None,
-            maternal_status_helper=None, **kwargs):
+                                      maternal_status_helper=None, **kwargs):
         """Returns true if participant is biological mother living with HIV.
         """
 
@@ -172,7 +205,17 @@ class CaregiverPredicates(PredicateCollection):
     def func_non_pregnant_caregivers(self, visit=None, **kwargs):
         """Returns true if non pregnant.
         """
-        return not self.enrolled_pregnant(visit=visit)
+        appt_model = django_apps.get_model(
+            f'edc_appointment.appointment')
+
+        try:
+            appt_obj = appt_model.objects.get(visit_code='1000M',
+                                              visit_code_sequence='0',
+                                              subject_identifier=visit.subject_identifier)
+        except appt_model.DoesNotExist:
+            return True
+        else:
+            return appt_obj.schedule_name != visit.appointment.schedule_name
 
     def func_newly_recruited(self, visit=None, **kwargs):
         cyhuu_model_cls = django_apps.get_model(
@@ -353,3 +396,17 @@ class CaregiverPredicates(PredicateCollection):
         Returns true if the visit is 2002M and the caregiver breastfeeding
         """
         return visit.visit_code == '2002M' and self.enrolled_pregnant(visit=visit)
+
+    def func_show_father_involvement(self, visit=None, maternal_status_helper=None, **kwargs):
+        """
+        Returns true if the visit is the 4th annual quarterly call and the caregiver is HIV positive
+        """
+        maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
+            maternal_visit=visit)
+
+        bio_mother = self.func_bio_mother(visit=visit)
+
+        if bio_mother and maternal_status_helper.hiv_status == POS:
+            return int(visit.visit_code[:4]) % 4 == 0
+
+        return False
