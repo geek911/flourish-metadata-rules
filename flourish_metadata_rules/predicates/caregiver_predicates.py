@@ -410,3 +410,11 @@ class CaregiverPredicates(PredicateCollection):
             return int(visit.visit_code[:4]) % 4 == 0
 
         return False
+    
+    def func_positive_prior_participant(self, visit=None, maternal_status_helper=None, **kwargs):
+        """Returns true if participant is from a prior bhp participant and 
+        """
+        maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
+            maternal_visit=visit)
+
+        return visit.visit_code != '1000M' and self.prior_participation(visit=visit) and self.func_hiv_positive(visit=visit)
