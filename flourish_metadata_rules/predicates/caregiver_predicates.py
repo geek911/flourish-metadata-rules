@@ -7,7 +7,6 @@ from edc_base.utils import age, get_utcnow
 from edc_constants.constants import POS, YES, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
-from numpy.core.numeric import False_
 
 
 def get_difference(birth_date=None):

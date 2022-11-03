@@ -1,10 +1,11 @@
+from flourish_caregiver.helper_classes import MaternalStatusHelper
+
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES, POS
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -118,7 +119,8 @@ class ChildPredicates(PredicateCollection):
             subject_identifier=visit.subject_identifier,
             field_name='anxiety_score')
 
-        return values and values[0] >= 10
+        if values[0] is not None:
+            return values[0] >= 10
 
     def func_phq9_referral_required(self, visit=None, **kwargs):
 
