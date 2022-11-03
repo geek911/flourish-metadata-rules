@@ -192,6 +192,16 @@ class CaregiverPredicates(PredicateCollection):
         cohort_a = visit.schedule_name[:2] == 'a_'
 
         return cohort_a and self.func_bio_mother_hiv(visit=visit)
+    
+    
+    def func_positive_prior_participant(self, visit=None, maternal_status_helper=None, **kwargs):
+        """Returns true if participant is from a prior bhp participant and 
+        """
+        maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
+            maternal_visit=visit)
+
+        return visit.visit_code != '1000M' and self.prior_participation(visit=visit) and self.func_hiv_positive(visit=visit)
+    
 
     def func_pregnant_hiv(self, visit=None, maternal_status_helper=None, **kwargs):
         """Returns true if a newly enrolled participant is pregnant and living with HIV.
