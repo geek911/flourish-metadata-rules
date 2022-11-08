@@ -406,7 +406,7 @@ class CaregiverPredicates(PredicateCollection):
 
         bio_mother = self.func_bio_mother(visit=visit)
 
-        if bio_mother and maternal_status_helper.hiv_status == POS:
+        if bio_mother:
             return int(visit.visit_code[:4]) % 4 == 0
 
         return False
