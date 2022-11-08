@@ -3,7 +3,7 @@ from flourish_caregiver.helper_classes import MaternalStatusHelper
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
-from edc_constants.constants import FEMALE, YES, POS, NEG
+from edc_constants.constants import FEMALE, YES, POS
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
 
@@ -111,6 +111,28 @@ class ChildPredicates(PredicateCollection):
             if dummy_consents:
                 dummy_consent = dummy_consents.latest('consent_datetime')
                 return dummy_consent.age_at_consent
+
+    def func_gad_referral_required(self, visit=None, **kwargs):
+
+        values = self.exists(
+            reference_name=f'{self.app_label}.childgadanxietyscreening',
+            subject_identifier=visit.subject_identifier,
+            field_name='anxiety_score')
+
+        if values[0] is not None:
+            return values[0] >= 10
+
+    def func_phq9_referral_required(self, visit=None, **kwargs):
+
+        phq9_cls = django_apps.get_model(f'{self.app_label}.childphqdepressionscreening')
+        try:
+            phq9_obj = phq9_cls.objects.get(
+                child_visit__subject_identifier=visit.subject_identifier)
+        except phq9_cls.DoesNotExist:
+            return False
+        else:
+            return (phq9_obj.depression_score >= 10 or phq9_obj.self_harm != 0
+                    or phq9_obj.self_harm_thoughts == YES or phq9_obj.suidice_attempt == YES)
 
     def func_consent_study_pregnant(self, visit=None, **kwargs):
         """Returns True if participant's mother consented to the study in pregnancy
