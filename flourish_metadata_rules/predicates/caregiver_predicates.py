@@ -1,4 +1,5 @@
 from datetime import date
+from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 from dateutil import relativedelta
 from django.apps import apps as django_apps
@@ -6,7 +7,6 @@ from edc_base.utils import age, get_utcnow
 from edc_constants.constants import POS, YES, NEG
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 def get_difference(birth_date=None):
@@ -127,19 +127,25 @@ class CaregiverPredicates(PredicateCollection):
 
     def func_gad_referral_required(self, visit=None, **kwargs):
 
-        values = self.exists(
-            reference_name=f'{self.app_label}.caregivergadanxietyscreening',
-            subject_identifier=visit.subject_identifier,
-            field_name='anxiety_score')
-
-        return values[0] and values[0] >= 10
+        gad_cls = django_apps.get_model(f'{self.app_label}.caregivergadanxietyscreening')
+        try:
+            gad_obj = gad_cls.objects.filter(
+                maternal_visit__subject_identifier=visit.subject_identifier,
+                maternal_visit__report_datetime__lte=visit.report_datetime).latest(
+                    'report_datetime')
+        except gad_cls.DoesNotExist:
+            return False
+        else:
+            return gad_obj.anxiety_score >= 10
 
     def func_phq9_referral_required(self, visit=None, **kwargs):
 
         phq9_cls = django_apps.get_model(f'{self.app_label}.caregiverphqdeprscreening')
         try:
-            phq9_obj = phq9_cls.objects.get(
-                maternal_visit__subject_identifier=visit.subject_identifier)
+            phq9_obj = phq9_cls.objects.filter(
+                maternal_visit__subject_identifier=visit.subject_identifier,
+                maternal_visit__report_datetime__lte=visit.report_datetime).latest(
+                    'report_datetime')
         except phq9_cls.DoesNotExist:
             return False
         else:
@@ -149,8 +155,10 @@ class CaregiverPredicates(PredicateCollection):
 
         phq9_cls = django_apps.get_model(f'{self.app_label}.caregiveredinburghdeprscreening')
         try:
-            phq9_obj = phq9_cls.objects.get(
-                maternal_visit__subject_identifier=visit.subject_identifier)
+            phq9_obj = phq9_cls.objects.filter(
+                maternal_visit__subject_identifier=visit.subject_identifier,
+                maternal_visit__report_datetime__lte=visit.report_datetime).latest(
+                    'report_datetime')
         except phq9_cls.DoesNotExist:
             return False
         else:

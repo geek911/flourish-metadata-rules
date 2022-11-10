@@ -13,7 +13,8 @@ class EdinburgDeprScreeningRuleGroup(CrfRuleGroup):
         predicate=pc.func_edinburgh_referral_required,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.caregiveredinburghreferral'])
+        target_models=[f'{app_label}.caregiveredinburghreferral',
+                       f'{app_label}.caregiveredinburghreferralfu'])
 
     class Meta:
         app_label = app_label

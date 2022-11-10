@@ -114,20 +114,25 @@ class ChildPredicates(PredicateCollection):
 
     def func_gad_referral_required(self, visit=None, **kwargs):
 
-        values = self.exists(
-            reference_name=f'{self.app_label}.childgadanxietyscreening',
-            subject_identifier=visit.subject_identifier,
-            field_name='anxiety_score')
-
-        if values[0] is not None:
-            return values[0] >= 10
+        gad_cls = django_apps.get_model(f'{self.app_label}.childgadanxietyscreening')
+        try:
+            gad_obj = gad_cls.objects.filter(
+                child_visit__subject_identifier=visit.subject_identifier,
+                child_visit__report_datetime__lte=visit.report_datetime).latest(
+                    'report_datetime')
+        except gad_cls.DoesNotExist:
+            return False
+        else:
+            return gad_obj.anxiety_score >= 10
 
     def func_phq9_referral_required(self, visit=None, **kwargs):
 
         phq9_cls = django_apps.get_model(f'{self.app_label}.childphqdepressionscreening')
         try:
-            phq9_obj = phq9_cls.objects.get(
-                child_visit__subject_identifier=visit.subject_identifier)
+            phq9_obj = phq9_cls.objects.filter(
+                child_visit__subject_identifier=visit.subject_identifier,
+                child_visit__report_datetime__lte=visit.report_datetime).latest(
+                    'report_datetime')
         except phq9_cls.DoesNotExist:
             return False
         else:

@@ -13,7 +13,8 @@ class GAD7AnxietyScreeningRuleGroup(CrfRuleGroup):
         predicate=pc.func_gad_referral_required,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.caregivergadreferral'])
+        target_models=[f'{app_label}.caregivergadreferral',
+                       f'{app_label}.caregivergadreferralfu'])
 
     class Meta:
         app_label = app_label
