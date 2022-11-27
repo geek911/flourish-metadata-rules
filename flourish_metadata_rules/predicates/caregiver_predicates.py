@@ -127,19 +127,25 @@ class CaregiverPredicates(PredicateCollection):
 
     def func_gad_referral_required(self, visit=None, **kwargs):
 
-        values = self.exists(
-            reference_name=f'{self.app_label}.caregivergadanxietyscreening',
-            subject_identifier=visit.subject_identifier,
-            field_name='anxiety_score')
-
-        return values and values[0] >= 10
+        gad_cls = django_apps.get_model(f'{self.app_label}.caregivergadanxietyscreening')
+        try:
+            gad_obj = gad_cls.objects.filter(
+                maternal_visit__subject_identifier=visit.subject_identifier,
+                maternal_visit__report_datetime__lte=visit.report_datetime).latest(
+                    'report_datetime')
+        except gad_cls.DoesNotExist:
+            return False
+        else:
+            return gad_obj.anxiety_score >= 10
 
     def func_phq9_referral_required(self, visit=None, **kwargs):
 
         phq9_cls = django_apps.get_model(f'{self.app_label}.caregiverphqdeprscreening')
         try:
-            phq9_obj = phq9_cls.objects.get(
-                maternal_visit__subject_identifier=visit.subject_identifier)
+            phq9_obj = phq9_cls.objects.filter(
+                maternal_visit__subject_identifier=visit.subject_identifier,
+                maternal_visit__report_datetime__lte=visit.report_datetime).latest(
+                    'report_datetime')
         except phq9_cls.DoesNotExist:
             return False
         else:
@@ -149,8 +155,10 @@ class CaregiverPredicates(PredicateCollection):
 
         phq9_cls = django_apps.get_model(f'{self.app_label}.caregiveredinburghdeprscreening')
         try:
-            phq9_obj = phq9_cls.objects.get(
-                maternal_visit__subject_identifier=visit.subject_identifier)
+            phq9_obj = phq9_cls.objects.filter(
+                maternal_visit__subject_identifier=visit.subject_identifier,
+                maternal_visit__report_datetime__lte=visit.report_datetime).latest(
+                    'report_datetime')
         except phq9_cls.DoesNotExist:
             return False
         else:
@@ -405,7 +413,15 @@ class CaregiverPredicates(PredicateCollection):
 
         bio_mother = self.func_bio_mother(visit=visit)
 
-        if bio_mother and maternal_status_helper.hiv_status == POS:
+        if bio_mother:
             return int(visit.visit_code[:4]) % 4 == 0
 
         return False
+    
+    def func_positive_prior_participant(self, visit=None, maternal_status_helper=None, **kwargs):
+        """Returns true if participant is from a prior bhp participant and 
+        """
+        maternal_status_helper = maternal_status_helper or MaternalStatusHelper(
+            maternal_visit=visit)
+
+        return visit.visit_code != '1000M' and self.prior_participation(visit=visit) and self.func_hiv_positive(visit=visit)

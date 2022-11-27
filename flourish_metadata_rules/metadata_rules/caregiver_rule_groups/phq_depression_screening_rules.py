@@ -13,7 +13,8 @@ class PHQ9DeprScreeningRuleGroup(CrfRuleGroup):
         predicate=pc.func_phq9_referral_required,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.caregiverphqreferral'])
+        target_models=[f'{app_label}.caregiverphqreferral',
+                       f'{app_label}.caregiverphqreferralfu'])
 
     class Meta:
         app_label = app_label
