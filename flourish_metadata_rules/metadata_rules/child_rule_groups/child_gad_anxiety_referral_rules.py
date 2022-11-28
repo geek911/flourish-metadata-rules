@@ -7,14 +7,14 @@ pc = ChildPredicates()
 
 
 @register()
-class ChildGAD7AnxietyScreeningRuleGroup(CrfRuleGroup):
+class ChildGAD7ReferralRuleGroup(CrfRuleGroup):
 
     gad_anxiety_referral = CrfRule(
-        predicate=P('anxiety_score', 'gte', 10),
+        predicate=P('referred_to', 'eq', 'receiving_emotional_care'),
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.childgadreferral'])
+        target_models=[f'{app_label}.childgadreferralfu'])
 
     class Meta:
         app_label = app_label
-        source_model = f'{app_label}.childgadanxietyscreening'
+        source_model = f'{app_label}.childgadreferral'

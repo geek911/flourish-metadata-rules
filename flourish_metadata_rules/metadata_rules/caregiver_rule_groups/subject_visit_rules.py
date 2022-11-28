@@ -101,6 +101,24 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.relationshipfatherinvolvement', ])
 
+    gad_anxiety_post_referral = CrfRule(
+        predicate=pc.func_gad_post_referral_required,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.caregivergadpostreferral'])
+
+    phq_screening_post_referral = CrfRule(
+        predicate=pc.func_phq9_post_referral_required,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.caregiverphqpostreferral'])
+
+    edinburg_screening_post_referral = CrfRule(
+        predicate=pc.func_edinburgh_post_referral_required,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.caregiveredinburghpostreferral'])
+
     class Meta:
         app_label = app_label
         source_model = f'{app_label}.maternalvisit'
