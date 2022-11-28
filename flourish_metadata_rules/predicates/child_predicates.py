@@ -116,9 +116,9 @@ class ChildPredicates(PredicateCollection):
 
         try:
             model_obj = model_cls.objects.get(
-                maternal_visit__subject_identifier=visit.subject_identifier,
-                maternal_visit__visit_code=visit.visit_code[:-2] + '0',
-                maternal_visit__visit_code_sequence=0)
+                child_visit__subject_identifier=visit.subject_identifier,
+                child_visit__visit_code=visit.visit_code[:-2] + '0',
+                child_visit__visit_code_sequence=0)
         except model_cls.DoesNotExist:
             return False
         else:
