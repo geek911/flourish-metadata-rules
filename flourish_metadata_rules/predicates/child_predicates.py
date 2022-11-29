@@ -3,7 +3,7 @@ from flourish_caregiver.helper_classes import MaternalStatusHelper
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
-from edc_constants.constants import FEMALE, YES, POS
+from edc_constants.constants import FEMALE, YES, POS, NO
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
 
@@ -19,6 +19,11 @@ class ChildPredicates(PredicateCollection):
     visit_model = f'{app_label}.childvisit'
     maternal_visit_model = 'flourish_caregiver.maternalvisit'
     tb_visit_screening_model = f'{app_label}.tbvisitscreeningadolescent'
+    hiv_testing_adol_model = f'{app_label}.hivtestingadol'
+    
+    @property
+    def hiv_testing_adol_model_cls(self):
+        return django_apps.get_model(self.hiv_testing_adol_model)
 
     @property
     def maternal_visit_model_cls(self):
@@ -391,4 +396,15 @@ class ChildPredicates(PredicateCollection):
             pass
         else:
             return tb_screening_obj.have_cough == YES or tb_screening_obj.fever == YES
-
+        
+    def func_diagnosied_with_hiv(self, visit, **kwargs):
+        try:
+        
+            hiv_testing_obj = self.hiv_testing_adol_model_cls.objects.get(
+                child_visit = visit
+            )
+            
+        except self.hiv_testing_adol_model_cls.DoesNotExist:
+            pass
+        else:
+            return hiv_testing_obj.referred_for_treatment == NO or hiv_testing_obj.seen_by_healthcare == YES
