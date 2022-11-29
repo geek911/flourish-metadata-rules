@@ -1,8 +1,7 @@
 from edc_metadata import NOT_REQUIRED, REQUIRED
 from edc_metadata_rules import RequisitionRule, RequisitionRuleGroup, register, P
 from edc_constants.constants import NO
-from flourish_labs import dna_pcr_panel, stool_sample_panel, infant_pl_cytokines_panel
-from flourish_labs import rectal_swab_panel
+from flourish_labs import lithium_heparin_panel
 from .....predicates import ChildPredicates
 
 
@@ -15,11 +14,11 @@ pc = ChildPredicates()
 class LabReqRuleGroup(RequisitionRuleGroup):
 
     # for dna_pcr and stool sample if the mother is positive
-    dna_pcr_panel_rule = RequisitionRule(
+    lithium_heparin_rule = RequisitionRule(
         predicate=pc.func_diagnosied_with_hiv,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_panels=[dna_pcr_panel,])
+        target_panels=[lithium_heparin_panel,])
 
     class Meta:
         app_label = app_label
