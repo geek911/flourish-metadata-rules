@@ -1,2 +1,1 @@
 from .child_visit_req_rules import ChildVisitReqRuleGroup
-from .tb_adolescent_requisition_rules import LabReqRuleGroup

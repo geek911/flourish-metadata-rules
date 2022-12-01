@@ -11,8 +11,8 @@ pc = ChildPredicates()
 @register()
 class HIVTestingAdolRuleGroup(CrfRuleGroup):
 
-    phq_screening_referral = CrfRule(
-        predicate=P('tb_referral', 'eq', NO),
+    hivtestingadol_rule = CrfRule(
+        predicate=pc.func_diagnosed_with_tb,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.hivtestingadol',])
