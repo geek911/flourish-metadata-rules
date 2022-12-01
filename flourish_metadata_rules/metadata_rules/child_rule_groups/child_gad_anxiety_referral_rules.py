@@ -9,7 +9,7 @@ pc = ChildPredicates()
 @register()
 class ChildGAD7ReferralRuleGroup(CrfRuleGroup):
 
-    gad_anxiety_referral = CrfRule(
+    gad_anxiety_referral_fu = CrfRule(
         predicate=P('referred_to', 'eq', 'receiving_emotional_care'),
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,

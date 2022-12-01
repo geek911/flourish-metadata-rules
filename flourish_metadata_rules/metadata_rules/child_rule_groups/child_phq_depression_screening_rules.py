@@ -14,7 +14,8 @@ class ChildPHQ9DeprScreeningRuleGroup(CrfRuleGroup):
     phq_screening_referral = CrfRule(
         predicate=PF('depression_score', 'self_harm', 'self_harm_thoughts',
                      'suidice_attempt',
-                     func=lambda w, x, y, z: True if w >= 10 or x != '0' or y == YES or z == YES else False),
+                     func=lambda w, x, y, z: True if w >= 10 or x != '0'
+                     or y == YES or z == YES else False),
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.childphqreferral'])
