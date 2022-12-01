@@ -127,12 +127,12 @@ class ChildPredicates(PredicateCollection):
     def func_gad_post_referral_required(self, visit=None, **kwargs):
 
         gad_referral_cls = django_apps.get_model(f'{self.app_label}.childgadreferral')
-        self.requires_post_referral(gad_referral_cls, visit)
+        return self.requires_post_referral(gad_referral_cls, visit)
 
     def func_phq9_post_referral_required(self, visit=None, **kwargs):
 
         phq9_referral_cls = django_apps.get_model(f'{self.app_label}.childphqreferral')
-        self.requires_post_referral(phq9_referral_cls, visit)
+        return self.requires_post_referral(phq9_referral_cls, visit)
 
     def func_consent_study_pregnant(self, visit=None, **kwargs):
         """Returns True if participant's mother consented to the study in pregnancy
