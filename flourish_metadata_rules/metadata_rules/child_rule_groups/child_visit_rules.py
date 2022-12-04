@@ -114,6 +114,18 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.childfoodsecurityquestionnaire', ])
 
+    child_gad_anxiety_post_referral = CrfRule(
+        predicate=pc.func_gad_post_referral_required,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.childgadpostreferral'])
+
+    child_phq_screening_post_referral = CrfRule(
+        predicate=pc.func_phq9_post_referral_required,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.childphqpostreferral'])
+
     class Meta:
         app_label = app_label
         source_model = f'{app_label}.childvisit'
