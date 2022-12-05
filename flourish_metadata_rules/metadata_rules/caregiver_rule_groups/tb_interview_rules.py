@@ -1,5 +1,6 @@
-from edc_metadata import NOT_REQUIRED, REQUIRED
-from edc_metadata_rules import CrfRule, CrfRuleGroup, register, P
+from edc_metadata.constants import NOT_REQUIRED, REQUIRED
+from edc_metadata_rules import CrfRule, CrfRuleGroup, register, PF, P
+
 
 app_label = 'flourish_caregiver'
 
@@ -7,26 +8,17 @@ app_label = 'flourish_caregiver'
 @register()
 class TbInterviewRuleGroup(CrfRuleGroup):
 
-    tbtranslation = CrfRule(
+    tb_transcription = CrfRule(
+        predicate = P('interview_language', 'is not', None),
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.tbinterviewtranscription'])
+
+    tb_translation = CrfRule(
         predicate=P('interview_language', 'eq', 'setswana'),
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.tbinterviewtranslation'])
-
-    tbtranscription = CrfRule(
-        predicate=P('interview_language', 'eq', 'english'),
-        consequence=REQUIRED,
-        alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.tbinterviewtranscription'])
-    
-    tb_translation_and_transcription =  CrfRule(
-        predicate=P('interview_language', 'eq', 'both'),
-        consequence=REQUIRED,
-        alternative=NOT_REQUIRED,
-        target_models=[
-            f'{app_label}.tbinterviewtranscription',
-            f'{app_label}.tbinterviewtranslation']
-        )
 
     class Meta:
         app_label = app_label
