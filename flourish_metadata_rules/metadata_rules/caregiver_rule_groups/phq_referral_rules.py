@@ -7,14 +7,14 @@ pc = CaregiverPredicates()
 
 
 @register()
-class GAD7AnxietyScreeningRuleGroup(CrfRuleGroup):
+class PHQ9ReferralRuleGroup(CrfRuleGroup):
 
-    gad_anxiety_referral = CrfRule(
-        predicate=P('anxiety_score', 'gte', 10),
+    phq_referral_fu = CrfRule(
+        predicate=P('referred_to', 'eq', 'receiving_emotional_care'),
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.caregivergadreferral'])
+        target_models=[f'{app_label}.caregiverphqreferralfu'])
 
     class Meta:
         app_label = app_label
-        source_model = f'{app_label}.caregivergadanxietyscreening'
+        source_model = f'{app_label}.caregiverphqreferral'

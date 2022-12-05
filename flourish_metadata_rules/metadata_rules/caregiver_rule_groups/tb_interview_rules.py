@@ -18,6 +18,15 @@ class TbInterviewRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.tbinterviewtranscription'])
+    
+    tb_translation_and_transcription =  CrfRule(
+        predicate=P('interview_language', 'eq', 'both'),
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[
+            f'{app_label}.tbinterviewtranscription',
+            f'{app_label}.tbinterviewtranslation']
+        )
 
     class Meta:
         app_label = app_label

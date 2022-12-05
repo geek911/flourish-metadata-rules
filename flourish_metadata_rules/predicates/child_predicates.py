@@ -1,10 +1,11 @@
+from flourish_caregiver.helper_classes import MaternalStatusHelper
+
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES, POS
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
-from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -111,26 +112,27 @@ class ChildPredicates(PredicateCollection):
                 dummy_consent = dummy_consents.latest('consent_datetime')
                 return dummy_consent.age_at_consent
 
-    def func_gad_referral_required(self, visit=None, **kwargs):
+    def requires_post_referral(self, model_cls, visit):
 
-        values = self.exists(
-            reference_name=f'{self.app_label}.childgadanxietyscreening',
-            subject_identifier=visit.subject_identifier,
-            field_name='anxiety_score')
-
-        return values and values[0] >= 10
-
-    def func_phq9_referral_required(self, visit=None, **kwargs):
-
-        phq9_cls = django_apps.get_model(f'{self.app_label}.childphqdepressionscreening')
         try:
-            phq9_obj = phq9_cls.objects.get(
-                child_visit__subject_identifier=visit.subject_identifier)
-        except phq9_cls.DoesNotExist:
+            model_obj = model_cls.objects.get(
+                child_visit__subject_identifier=visit.subject_identifier,
+                child_visit__visit_code=visit.visit_code[:-1] + '0',
+                child_visit__visit_code_sequence=0)
+        except model_cls.DoesNotExist:
             return False
         else:
-            return (phq9_obj.depression_score >= 10 or phq9_obj.self_harm != 0
-                    or phq9_obj.self_harm_thoughts == YES or phq9_obj.suidice_attempt == YES)
+            return model_obj.referred_to not in ['receiving_emotional_care', 'declined']
+
+    def func_gad_post_referral_required(self, visit=None, **kwargs):
+
+        gad_referral_cls = django_apps.get_model(f'{self.app_label}.childgadreferral')
+        return self.requires_post_referral(gad_referral_cls, visit)
+
+    def func_phq9_post_referral_required(self, visit=None, **kwargs):
+
+        phq9_referral_cls = django_apps.get_model(f'{self.app_label}.childphqreferral')
+        return self.requires_post_referral(phq9_referral_cls, visit)
 
     def func_consent_study_pregnant(self, visit=None, **kwargs):
         """Returns True if participant's mother consented to the study in pregnancy
