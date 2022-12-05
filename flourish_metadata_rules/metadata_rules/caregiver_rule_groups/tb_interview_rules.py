@@ -8,16 +8,19 @@ app_label = 'flourish_caregiver'
 @register()
 class TbInterviewRuleGroup(CrfRuleGroup):
 
-    tb_transcription = CrfRule(
+    transcription_and_transcript = CrfRule(
         predicate = P('interview_language', 'is not', None),
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.tbinterviewtranscription'])
+        target_models=[
+            f'{app_label}.tbinterviewtranscription',
+            f'{app_label}.tbinterviewtranslation',
+        ])
 
-    tb_translation = CrfRule(
-        predicate=P('interview_language', 'eq', 'setswana'),
-        consequence=REQUIRED,
-        alternative=NOT_REQUIRED,
+    translation = CrfRule(
+        predicate=P('interview_language', 'eq', 'english'),
+        consequence=NOT_REQUIRED,
+        alternative=REQUIRED,
         target_models=[f'{app_label}.tbinterviewtranslation'])
 
     class Meta:
