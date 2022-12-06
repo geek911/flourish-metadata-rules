@@ -20,7 +20,7 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
                        f'{app_label}.tbscreenpreg',
                        f'{app_label}.tbpresencehouseholdmembers',
                        f'{app_label}.substanceusepriorpregnancy',
-                       f'{app_label}.tbroutinehealthscreenv2', ])
+                       f'{app_label}.tbroutinehealthscreen', ])
 
     biological_with_hiv_not_preg = CrfRule(
         predicate=pc.func_positive_prior_participant,
@@ -118,6 +118,13 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.caregiveredinburghpostreferral'])
+
+    post_adherence_arv = CrfRule(
+        predicate=pc.func_hiv_positive,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.maternalarvpostadherence']
+    )
 
     class Meta:
         app_label = app_label
