@@ -119,7 +119,7 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.caregiveredinburghpostreferral'])
 
-    post_adherence_arv = CrfRule(
+    hiv_positive = CrfRule(
         predicate=pc.func_hiv_positive,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
