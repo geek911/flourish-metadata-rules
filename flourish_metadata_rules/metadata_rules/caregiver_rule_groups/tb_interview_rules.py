@@ -17,7 +17,7 @@ class TbInterviewRuleGroup(CrfRuleGroup):
         ])
 
     translation = CrfRule(
-        predicate=PF('interview_language', lambda language: True if language ==
+        predicate=PF('interview_language', func=lambda language: True if language ==
                      'setswana' or language == 'both' else False),
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
