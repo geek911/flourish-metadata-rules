@@ -4,3 +4,5 @@ from .child_visit_rules import ChildVisitRuleGroup
 from .socio_demographic_data_rules import ChildSocioDemographicRuleGroup
 from .child_conginetal_anomalies_rules import CongenitalAnomaliesRuleGroup
 from .requisition_rules import ChildVisitReqRuleGroup
+from .tb_adolescent_rules import Covid19AdolRuleGroup
+from .tb_adolescent_rules import HIVTestingAdolRuleGroup
