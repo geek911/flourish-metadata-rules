@@ -3,7 +3,7 @@ from flourish_caregiver.helper_classes import MaternalStatusHelper
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
-from edc_constants.constants import FEMALE, YES, POS
+from edc_constants.constants import FEMALE, YES, POS, NO
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
 
@@ -18,10 +18,22 @@ class ChildPredicates(PredicateCollection):
     maternal_app_label = 'flourish_caregiver'
     visit_model = f'{app_label}.childvisit'
     maternal_visit_model = 'flourish_caregiver.maternalvisit'
+    tb_visit_screening_model = f'{app_label}.tbvisitscreeningadolescent'
+    tb_presence_model = f'{app_label}.tbpresencehouseholdmembersadol'
+    
+    @property
+    def tb_presence_model_cls(self):
+        return django_apps.get_model(self.tb_presence_model)
 
     @property
     def maternal_visit_model_cls(self):
         return django_apps.get_model(self.maternal_visit_model)
+    
+    @property
+    def tb_visit_screening_model_cls(self):
+        return django_apps.get_model(self.tb_visit_screening_model)
+    
+    
 
     def func_hiv_exposed(self, visit=None, **kwargs):
         """
@@ -375,3 +387,29 @@ class ChildPredicates(PredicateCollection):
         """
 
         return visit.visit_code == '2000D' and visit.visit_code_sequence == 0
+    
+    
+    def func_cough_and_fever(self, visit, **kwargs):
+        
+        try:
+        
+            tb_screening_obj = self.tb_visit_screening_model_cls.objects.get(
+                child_visit = visit
+            )
+            
+        except self.tb_visit_screening_model_cls.DoesNotExist:
+            pass
+        else:
+            return tb_screening_obj.have_cough == YES or tb_screening_obj.fever == YES
+        
+    def func_diagnosed_with_tb(self, visit, **kwargs):
+        try:
+        
+            tb_presence_obj = self.tb_presence_model_cls.objects.get(
+                child_visit = visit
+            )
+            
+        except self.tb_presence_model_cls.DoesNotExist:
+            pass
+        else:
+            return tb_presence_obj.tb_referral == NO

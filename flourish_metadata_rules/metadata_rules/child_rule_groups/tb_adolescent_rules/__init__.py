@@ -1,0 +1,1 @@
+from .covid_19_rules import Covid19AdolRuleGroup

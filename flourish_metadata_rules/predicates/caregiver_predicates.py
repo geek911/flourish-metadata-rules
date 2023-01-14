@@ -110,13 +110,9 @@ class CaregiverPredicates(PredicateCollection):
         maternal_dataset_model = django_apps.get_model(
             f'{self.app_label}.maternaldataset')
 
-        try:
-            maternal_dataset_model.objects.get(
-                subject_identifier=visit.subject_identifier)
-        except maternal_dataset_model.DoesNotExist:
-            return False
-        else:
-            return True
+        prior_participation = maternal_dataset_model.objects.filter(
+            subject_identifier=visit.subject_identifier)
+        return True if prior_participation else False
 
     def func_preg_no_prior_participation(self, visit=None, **kwargs):
         """Returns true if participant is expecting and never
