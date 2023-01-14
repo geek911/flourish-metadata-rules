@@ -11,7 +11,7 @@ pc = ChildPredicates()
 @register()
 class Covid19AdolRuleGroup(CrfRuleGroup):
 
-    phq_screening_referral = CrfRule(
+    covid = CrfRule(
         predicate=pc.func_cough_and_fever,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
