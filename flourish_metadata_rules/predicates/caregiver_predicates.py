@@ -110,13 +110,9 @@ class CaregiverPredicates(PredicateCollection):
         maternal_dataset_model = django_apps.get_model(
             f'{self.app_label}.maternaldataset')
 
-        try:
-            maternal_dataset_model.objects.get(
-                subject_identifier=visit.subject_identifier)
-        except maternal_dataset_model.DoesNotExist:
-            return False
-        else:
-            return True
+        prior_participation = maternal_dataset_model.objects.filter(
+            subject_identifier=visit.subject_identifier)
+        return True if prior_participation else False
 
     def func_preg_no_prior_participation(self, visit=None, **kwargs):
         """Returns true if participant is expecting and never
@@ -125,44 +121,33 @@ class CaregiverPredicates(PredicateCollection):
         return (self.enrolled_pregnant(visit=visit)
                 and not self.prior_participation(visit=visit))
 
-    def func_gad_referral_required(self, visit=None, **kwargs):
+    def requires_post_referral(self, model_cls, visit):
 
-        gad_cls = django_apps.get_model(f'{self.app_label}.caregivergadanxietyscreening')
         try:
-            gad_obj = gad_cls.objects.filter(
+            model_obj = model_cls.objects.get(
                 maternal_visit__subject_identifier=visit.subject_identifier,
-                maternal_visit__report_datetime__lte=visit.report_datetime).latest(
-                    'report_datetime')
-        except gad_cls.DoesNotExist:
+                maternal_visit__visit_code=visit.visit_code[:-2] + '0M',
+                maternal_visit__visit_code_sequence=0)
+        except model_cls.DoesNotExist:
             return False
         else:
-            return gad_obj.anxiety_score >= 10
+            return model_obj.referred_to not in ['receiving_emotional_care', 'declined']
 
-    def func_phq9_referral_required(self, visit=None, **kwargs):
+    def func_gad_post_referral_required(self, visit=None, **kwargs):
 
-        phq9_cls = django_apps.get_model(f'{self.app_label}.caregiverphqdeprscreening')
-        try:
-            phq9_obj = phq9_cls.objects.filter(
-                maternal_visit__subject_identifier=visit.subject_identifier,
-                maternal_visit__report_datetime__lte=visit.report_datetime).latest(
-                    'report_datetime')
-        except phq9_cls.DoesNotExist:
-            return False
-        else:
-            return phq9_obj.depression_score >= 5 or phq9_obj.self_harm != 0
+        gad_referral_cls = django_apps.get_model(f'{self.app_label}.caregivergadreferral')
+        return self.requires_post_referral(gad_referral_cls, visit)
 
-    def func_edinburgh_referral_required(self, visit=None, **kwargs):
+    def func_phq9_post_referral_required(self, visit=None, **kwargs):
 
-        phq9_cls = django_apps.get_model(f'{self.app_label}.caregiveredinburghdeprscreening')
-        try:
-            phq9_obj = phq9_cls.objects.filter(
-                maternal_visit__subject_identifier=visit.subject_identifier,
-                maternal_visit__report_datetime__lte=visit.report_datetime).latest(
-                    'report_datetime')
-        except phq9_cls.DoesNotExist:
-            return False
-        else:
-            return phq9_obj.depression_score >= 10 or phq9_obj.self_harm != 0
+        phq9_referral_cls = django_apps.get_model(f'{self.app_label}.caregiverphqreferral')
+        return self.requires_post_referral(phq9_referral_cls, visit)
+
+    def func_edinburgh_post_referral_required(self, visit=None, **kwargs):
+
+        edinburgh_referral_cls = django_apps.get_model(
+            f'{self.app_label}.caregiveredinburghreferral')
+        return self.requires_post_referral(edinburgh_referral_cls, visit)
 
     def func_caregiver_no_prior_participation(self, visit=None, **kwargs):
         """Returns true if participant is a caregiver and never participated in a BHP study.
@@ -417,7 +402,7 @@ class CaregiverPredicates(PredicateCollection):
             return int(visit.visit_code[:4]) % 4 == 0
 
         return False
-    
+
     def func_positive_prior_participant(self, visit=None, maternal_status_helper=None, **kwargs):
         """Returns true if participant is from a prior bhp participant and 
         """
