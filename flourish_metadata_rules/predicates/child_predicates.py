@@ -384,8 +384,6 @@ class ChildPredicates(PredicateCollection):
     
     def func_cough_and_fever(self, visit, **kwargs):
         
-        have_cough_and_fever = False
-        
         try:
         
             tb_screening_obj = self.tb_visit_screening_model_cls.objects.get(
@@ -393,11 +391,10 @@ class ChildPredicates(PredicateCollection):
             )
             
         except self.tb_visit_screening_model_cls.DoesNotExist:
-            have_cough_and_fever =  False
+            return False
         else:
-            have_cough_and_fever = tb_screening_obj.have_cough == YES or tb_screening_obj.fever == YES
+            return tb_screening_obj.have_cough == YES or tb_screening_obj.fever == YES
         
-        return have_cough_and_fever
         
     def func_diagnosed_with_tb(self, visit, **kwargs):
         try:
@@ -407,6 +404,6 @@ class ChildPredicates(PredicateCollection):
             )
             
         except self.tb_presence_model_cls.DoesNotExist:
-            pass
+            return False
         else:
             return tb_presence_obj.tb_referral == NO
