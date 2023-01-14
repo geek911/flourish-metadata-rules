@@ -18,22 +18,10 @@ class ChildPredicates(PredicateCollection):
     maternal_app_label = 'flourish_caregiver'
     visit_model = f'{app_label}.childvisit'
     maternal_visit_model = 'flourish_caregiver.maternalvisit'
-    tb_visit_screening_model = f'{app_label}.tbvisitscreeningadolescent'
-    tb_presence_model = f'{app_label}.tbpresencehouseholdmembersadol'
-    
-    @property
-    def tb_presence_model_cls(self):
-        return django_apps.get_model(self.tb_presence_model)
 
     @property
     def maternal_visit_model_cls(self):
         return django_apps.get_model(self.maternal_visit_model)
-    
-    @property
-    def tb_visit_screening_model_cls(self):
-        return django_apps.get_model(self.tb_visit_screening_model)
-    
-    
 
     def func_hiv_exposed(self, visit=None, **kwargs):
         """
@@ -124,32 +112,27 @@ class ChildPredicates(PredicateCollection):
                 dummy_consent = dummy_consents.latest('consent_datetime')
                 return dummy_consent.age_at_consent
 
-    def func_gad_referral_required(self, visit=None, **kwargs):
+    def requires_post_referral(self, model_cls, visit):
 
-        gad_cls = django_apps.get_model(f'{self.app_label}.childgadanxietyscreening')
         try:
-            gad_obj = gad_cls.objects.filter(
+            model_obj = model_cls.objects.get(
                 child_visit__subject_identifier=visit.subject_identifier,
-                child_visit__report_datetime__lte=visit.report_datetime).latest(
-                    'report_datetime')
-        except gad_cls.DoesNotExist:
+                child_visit__visit_code=visit.visit_code[:-1] + '0',
+                child_visit__visit_code_sequence=0)
+        except model_cls.DoesNotExist:
             return False
         else:
-            return gad_obj.anxiety_score >= 10
+            return model_obj.referred_to not in ['receiving_emotional_care', 'declined']
 
-    def func_phq9_referral_required(self, visit=None, **kwargs):
+    def func_gad_post_referral_required(self, visit=None, **kwargs):
 
-        phq9_cls = django_apps.get_model(f'{self.app_label}.childphqdepressionscreening')
-        try:
-            phq9_obj = phq9_cls.objects.filter(
-                child_visit__subject_identifier=visit.subject_identifier,
-                child_visit__report_datetime__lte=visit.report_datetime).latest(
-                    'report_datetime')
-        except phq9_cls.DoesNotExist:
-            return False
-        else:
-            return (phq9_obj.depression_score >= 10 or phq9_obj.self_harm != 0
-                    or phq9_obj.self_harm_thoughts == YES or phq9_obj.suidice_attempt == YES)
+        gad_referral_cls = django_apps.get_model(f'{self.app_label}.childgadreferral')
+        return self.requires_post_referral(gad_referral_cls, visit)
+
+    def func_phq9_post_referral_required(self, visit=None, **kwargs):
+
+        phq9_referral_cls = django_apps.get_model(f'{self.app_label}.childphqreferral')
+        return self.requires_post_referral(phq9_referral_cls, visit)
 
     def func_consent_study_pregnant(self, visit=None, **kwargs):
         """Returns True if participant's mother consented to the study in pregnancy
@@ -386,6 +369,8 @@ class ChildPredicates(PredicateCollection):
     
     def func_cough_and_fever(self, visit, **kwargs):
         
+        have_cough_and_fever = False
+        
         try:
         
             tb_screening_obj = self.tb_visit_screening_model_cls.objects.get(
@@ -393,9 +378,11 @@ class ChildPredicates(PredicateCollection):
             )
             
         except self.tb_visit_screening_model_cls.DoesNotExist:
-            pass
+            have_cough_and_fever =  False
         else:
-            return tb_screening_obj.have_cough == YES or tb_screening_obj.fever == YES
+            have_cough_and_fever = tb_screening_obj.have_cough == YES or tb_screening_obj.fever == YES
+        
+        return have_cough_and_fever
         
     def func_diagnosed_with_tb(self, visit, **kwargs):
         try:
