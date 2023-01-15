@@ -1,4 +1,4 @@
-from edc_constants.constants import YES
+from edc_constants.constants import YES, NO
 from edc_metadata import NOT_REQUIRED, REQUIRED
 from edc_metadata_rules import CrfRule, CrfRuleGroup, register, P
 
@@ -9,14 +9,14 @@ pc = ChildPredicates()
 
 
 @register()
-class Covid19AdolRuleGroup(CrfRuleGroup):
+class HIVTestingAdolRuleGroup(CrfRuleGroup):
 
-    covid = CrfRule(
-        predicate=pc.func_cough_and_fever,
+    hivtestingadol_rule = CrfRule(
+        predicate=pc.func_diagnosed_with_tb,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.covid19adol',])
+        target_models=[f'{app_label}.hivtestingadol',])
 
     class Meta:
         app_label = app_label
-        source_model = f'{app_label}.tbvisitscreeningadolescent'
+        source_model = f'{app_label}.tbpresencehouseholdmembersadol'

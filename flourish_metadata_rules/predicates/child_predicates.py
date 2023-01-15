@@ -18,9 +18,10 @@ class ChildPredicates(PredicateCollection):
     maternal_app_label = 'flourish_caregiver'
     visit_model = f'{app_label}.childvisit'
     maternal_visit_model = 'flourish_caregiver.maternalvisit'
+    
     tb_visit_screening_model = f'{app_label}.tbvisitscreeningadolescent'
     tb_presence_model = f'{app_label}.tbpresencehouseholdmembersadol'
-    
+
     @property
     def tb_presence_model_cls(self):
         return django_apps.get_model(self.tb_presence_model)
@@ -28,12 +29,14 @@ class ChildPredicates(PredicateCollection):
     @property
     def maternal_visit_model_cls(self):
         return django_apps.get_model(self.maternal_visit_model)
-    
+
     @property
     def tb_visit_screening_model_cls(self):
         return django_apps.get_model(self.tb_visit_screening_model)
-    
-    
+
+    @property
+    def maternal_visit_model_cls(self):
+        return django_apps.get_model(self.maternal_visit_model)
 
     def func_hiv_exposed(self, visit=None, **kwargs):
         """
@@ -388,9 +391,10 @@ class ChildPredicates(PredicateCollection):
             )
             
         except self.tb_visit_screening_model_cls.DoesNotExist:
-            pass
+            return False
         else:
             return tb_screening_obj.have_cough == YES or tb_screening_obj.fever == YES
+        
         
     def func_diagnosed_with_tb(self, visit, **kwargs):
         try:
@@ -400,6 +404,6 @@ class ChildPredicates(PredicateCollection):
             )
             
         except self.tb_presence_model_cls.DoesNotExist:
-            pass
+            return False
         else:
             return tb_presence_obj.tb_referral == NO
