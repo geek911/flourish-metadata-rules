@@ -1,2 +1,1 @@
 from .covid_19_rules import Covid19AdolRuleGroup
-from .hiv_testing_rules import HIVTestingAdolRuleGroup
