@@ -15,7 +15,7 @@ class Covid19AdolRuleGroup(CrfRuleGroup):
         predicate=pc.func_cough_and_fever,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.covid19adol',])
+        target_models=[f'{app_label}.covid19adol', ])
 
     class Meta:
         app_label = app_label
