@@ -12,12 +12,12 @@ pc = ChildPredicates()
 @register()
 class ChildVisitReqRuleGroup(RequisitionRuleGroup):
 
-    # for dna_pcr and stool sample if the mother is positive
+    # for dna_pcr if the newly enroled pregnant WLHIV
     dna_pcr_panel_rule = RequisitionRule(
-        predicate=pc.func_hiv_exposed,
+        predicate=pc.func_mother_preg_pos,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_panels=[dna_pcr_panel, stool_sample_panel])
+        target_panels=[dna_pcr_panel, ])
 
     #  stool sample for 2000D if the mother is negative
     stool_sample_panel_rule = RequisitionRule(
