@@ -39,9 +39,11 @@ class CaregiverPredicates(PredicateCollection):
     def enrolled_pregnant(self, visit=None, **kwargs):
         """Returns true if expecting
         """
-        enrollment_model = django_apps.get_model(f'{self.app_label}.antenatalenrollment')
+        enrollment_model = django_apps.get_model(
+            f'{self.app_label}.antenatalenrollment')
         try:
-            enrollment_model.objects.get(subject_identifier=visit.subject_identifier)
+            enrollment_model.objects.get(
+                subject_identifier=visit.subject_identifier)
         except enrollment_model.DoesNotExist:
             return False
         else:
@@ -64,7 +66,8 @@ class CaregiverPredicates(PredicateCollection):
         offstudy_cls = django_apps.get_model('flourish_prn.childoffstudy')
 
         try:
-            offstudy_cls.objects.get(subject_identifier=child_subject_identifier)
+            offstudy_cls.objects.get(
+                subject_identifier=child_subject_identifier)
         except offstudy_cls.DoesNotExist:
             return False
         else:
@@ -99,7 +102,8 @@ class CaregiverPredicates(PredicateCollection):
                 raise
             else:
                 if registered_child.dob:
-                    child_age = age(registered_child.dob, visit.report_datetime)
+                    child_age = age(registered_child.dob,
+                                    visit.report_datetime)
                     child_age = float(f'{child_age.years}.{child_age.months}')
 
                     if (child_age <= 15.9 and child_age >= 10):
@@ -135,12 +139,14 @@ class CaregiverPredicates(PredicateCollection):
 
     def func_gad_post_referral_required(self, visit=None, **kwargs):
 
-        gad_referral_cls = django_apps.get_model(f'{self.app_label}.caregivergadreferral')
+        gad_referral_cls = django_apps.get_model(
+            f'{self.app_label}.caregivergadreferral')
         return self.requires_post_referral(gad_referral_cls, visit)
 
     def func_phq9_post_referral_required(self, visit=None, **kwargs):
 
-        phq9_referral_cls = django_apps.get_model(f'{self.app_label}.caregiverphqreferral')
+        phq9_referral_cls = django_apps.get_model(
+            f'{self.app_label}.caregiverphqreferral')
         return self.requires_post_referral(phq9_referral_cls, visit)
 
     def func_edinburgh_post_referral_required(self, visit=None, **kwargs):
@@ -171,7 +177,7 @@ class CaregiverPredicates(PredicateCollection):
 
         return (self.func_bio_mother(visit=visit) and not self.currently_pregnant(
             visit=visit)
-                and maternal_status_helper.hiv_status == POS)
+            and maternal_status_helper.hiv_status == POS)
 
     def func_bio_mothers_hiv_cohort_a(self, visit=None,
                                       maternal_status_helper=None, **kwargs):
@@ -316,7 +322,8 @@ class CaregiverPredicates(PredicateCollection):
             visit)
         tb_screening_form_cls = django_apps.get_model(
             f'{self.app_label}.{tb_screening_form}')
-        consent_model_cls = django_apps.get_model(f'flourish_caregiver.{consent_model}')
+        consent_model_cls = django_apps.get_model(
+            f'flourish_caregiver.{consent_model}')
         ultrasound_model_cls = django_apps.get_model(
             f'flourish_caregiver.{ultrasound_model}')
         tb_consent_model_cls = django_apps.get_model(
@@ -329,7 +336,8 @@ class CaregiverPredicates(PredicateCollection):
         child_subjects = list(consent_obj[0].caregiverchildconsent_set.all().values_list(
             'subject_identifier', flat=True))
         try:
-            tb_consent_model_cls.objects.get(subject_identifier=visit.subject_identifier)
+            tb_consent_model_cls.objects.get(
+                subject_identifier=visit.subject_identifier)
         except tb_consent_model_cls.DoesNotExist:
             if (consent_obj and get_difference(consent_obj[0].dob)
                     >= 18 and maternal_status_helper.hiv_status == POS and
@@ -345,11 +353,14 @@ class CaregiverPredicates(PredicateCollection):
                             subject_identifier=child_subj).latest('consent_datetime')
                         if (visit.visit_code == '2000D' or visit.visit_code == '2001M') \
                                 and child_consent.child_dob:
-                            child_age = age(child_consent.child_dob, get_utcnow())
-                            child_age_in_months = (child_age.years * 12) + child_age.months
+                            child_age = age(
+                                child_consent.child_dob, get_utcnow())
+                            child_age_in_months = (
+                                child_age.years * 12) + child_age.months
                             if child_age_in_months < 2:
                                 try:
-                                    last_tb_bj = tb_screening_form_objs.latest('created')
+                                    last_tb_bj = tb_screening_form_objs.latest(
+                                        'created')
                                 except tb_screening_form_cls.DoesNotExist:
                                     return True
                                 else:
@@ -372,18 +383,17 @@ class CaregiverPredicates(PredicateCollection):
             return False
         else:
             take_off_schedule = (
-                    visit_screening.have_cough == YES or
-                    visit_screening.cough_duration == '=>2 week' or
-                    visit_screening.fever == YES or
-                    visit_screening.night_sweats == YES or
-                    visit_screening.weight_loss == YES or
-                    visit_screening.cough_blood == YES or
-                    visit_screening.enlarged_lymph_nodes == YES
+                visit_screening.have_cough == YES or
+                visit_screening.cough_duration == '=>2 week' or
+                visit_screening.fever == YES or
+                visit_screening.night_sweats == YES or
+                visit_screening.weight_loss == YES or
+                visit_screening.cough_blood == YES or
+                visit_screening.enlarged_lymph_nodes == YES
             )
             return take_off_schedule
 
     def func_show_b_feeding_form(self, visit=None, **kwargs):
-
         """
         Returns true if the visit is 2002M and the caregiver breastfeeding
         """
