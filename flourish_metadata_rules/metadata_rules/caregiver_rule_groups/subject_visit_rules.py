@@ -52,12 +52,6 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
                        f'{app_label}.maternalarvatdelivery',
                        f'{app_label}.maternalhivinterimhx', ])
 
-    non_preg = CrfRule(
-        predicate=pc.func_non_pregnant_caregivers,
-        consequence=REQUIRED,
-        alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.caregiverphqdeprscreening'])
-
     LWHIV_10_15a = CrfRule(
         predicate=pc.func_LWHIV_aged_10_15a,
         consequence=REQUIRED,
@@ -120,7 +114,7 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         target_models=[f'{app_label}.caregiveredinburghpostreferral'])
 
     hiv_positive = CrfRule(
-        predicate=pc.func_hiv_positive,
+        predicate=pc.func_bio_mother_hiv,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.maternalarvpostadherence']

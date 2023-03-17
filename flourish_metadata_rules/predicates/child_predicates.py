@@ -18,7 +18,7 @@ class ChildPredicates(PredicateCollection):
     maternal_app_label = 'flourish_caregiver'
     visit_model = f'{app_label}.childvisit'
     maternal_visit_model = 'flourish_caregiver.maternalvisit'
-    
+
     tb_visit_screening_model = f'{app_label}.tbvisitscreeningadolescent'
     tb_presence_model = f'{app_label}.tbpresencehouseholdmembersadol'
 
@@ -33,10 +33,6 @@ class ChildPredicates(PredicateCollection):
     @property
     def tb_visit_screening_model_cls(self):
         return django_apps.get_model(self.tb_visit_screening_model)
-
-    @property
-    def maternal_visit_model_cls(self):
-        return django_apps.get_model(self.maternal_visit_model)
 
     def func_hiv_exposed(self, visit=None, **kwargs):
         """
@@ -152,9 +148,19 @@ class ChildPredicates(PredicateCollection):
     def func_consent_study_pregnant(self, visit=None, **kwargs):
         """Returns True if participant's mother consented to the study in pregnancy
         """
+        preg_enrol = False
+        consent_cls = django_apps.get_model(
+            f'{self.maternal_app_label}.caregiverchildconsent')
         maternal_delivery_cls = django_apps.get_model(
             f'{self.maternal_app_label}.maternaldelivery')
         child_birth_data_model = f'{self.app_label}.birthdata'
+
+        consent_objs = consent_cls.objects.filter(
+            subject_identifier=visit.subject_identifier)
+
+        if consent_objs:
+            preg_enrol = getattr(
+                consent_objs.latest('consent_datetime'), 'preg_enroll', False)
 
         try:
             maternal_delivery_cls.objects.get(
@@ -168,7 +174,7 @@ class ChildPredicates(PredicateCollection):
                 identifier=visit.appointment.subject_identifier,
                 report_datetime__lt=visit.report_datetime).order_by(
                 '-report_datetime').first()
-            return False if previous_obj else True
+            return False if previous_obj else preg_enrol
 
     def func_mother_preg_pos(self, visit=None, **kwargs):
         """ Returns True if participant's mother consented to the study in
@@ -374,35 +380,26 @@ class ChildPredicates(PredicateCollection):
 
     def func_2000D(self, visit, **kwargs):
         """
-
         Returns True if visit is 2000D
-
         """
 
         return visit.visit_code == '2000D' and visit.visit_code_sequence == 0
-    
-    
+
     def func_cough_and_fever(self, visit, **kwargs):
-        
+
         try:
-        
             tb_screening_obj = self.tb_visit_screening_model_cls.objects.get(
-                child_visit = visit
-            )
-            
+                child_visit=visit)
+
         except self.tb_visit_screening_model_cls.DoesNotExist:
             return False
         else:
             return tb_screening_obj.have_cough == YES or tb_screening_obj.fever == YES
-        
-        
+
     def func_diagnosed_with_tb(self, visit, **kwargs):
         try:
-        
             tb_presence_obj = self.tb_presence_model_cls.objects.get(
-                child_visit = visit
-            )
-            
+                child_visit=visit)
         except self.tb_presence_model_cls.DoesNotExist:
             return False
         else:
