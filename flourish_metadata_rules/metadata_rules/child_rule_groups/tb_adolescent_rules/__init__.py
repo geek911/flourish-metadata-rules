@@ -5,3 +5,5 @@ from .tb_hiv_testing_rules import HivTestingAdolRuleGroup
 from .tb_lab_results_rules import TbLabResultsAdolRuleGroup
 from .tb_presence_household_rules import TbPresenceHouseholdMembersAdolRuleGroup
 from .tb_visit_screening_rules import TbVisitScreeningAdolRuleGroup
+from .tb_engagement_rules import TbAdolEngagementRuleGroup
+from .tb_interview_rules import TbAdolInterviewRuleGroup
