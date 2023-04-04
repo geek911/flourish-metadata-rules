@@ -19,3 +19,5 @@ from .child_rule_groups import ChildVisitReqRuleGroup
 from .child_rule_groups import ChildVisitRuleGroup
 from .child_rule_groups import CongenitalAnomaliesRuleGroup
 from .child_rule_groups import Covid19AdolRuleGroup
+from .child_rule_groups import TbAdolEngagementRuleGroup
+from .child_rule_groups import TbAdolInterviewRuleGroup
