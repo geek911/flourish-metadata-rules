@@ -8,3 +8,10 @@ from .requisition_rules import ChildVisitReqRuleGroup
 from .socio_demographic_data_rules import ChildSocioDemographicRuleGroup
 from .tb_adolescent_rules import Covid19AdolRuleGroup, TbAdolEngagementRuleGroup, \
     TbAdolInterviewRuleGroup
+from .child_conginetal_anomalies_rules import CongenitalAnomaliesRuleGroup
+from .requisition_rules import ChildVisitReqRuleGroup
+from .tb_adolescent_rules import HivTestingAdolRuleGroup
+from .tb_adolescent_rules import TbLabResultsAdolRuleGroup
+from .tb_adolescent_rules import TbPresenceHouseholdMembersAdolRuleGroup
+from .tb_adolescent_rules import TbVisitScreeningAdolRuleGroup
+

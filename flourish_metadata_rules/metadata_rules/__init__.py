@@ -21,3 +21,7 @@ from .child_rule_groups import CongenitalAnomaliesRuleGroup
 from .child_rule_groups import Covid19AdolRuleGroup
 from .child_rule_groups import TbAdolEngagementRuleGroup
 from .child_rule_groups import TbAdolInterviewRuleGroup
+from .child_rule_groups import HivTestingAdolRuleGroup
+from .child_rule_groups import TbLabResultsAdolRuleGroup
+from .child_rule_groups import TbPresenceHouseholdMembersAdolRuleGroup
+from .child_rule_groups import TbVisitScreeningAdolRuleGroup
