@@ -25,4 +25,3 @@ from .child_rule_groups import HivTestingAdolRuleGroup
 from .child_rule_groups import TbLabResultsAdolRuleGroup
 from .child_rule_groups import TbPresenceHouseholdMembersAdolRuleGroup
 from .child_rule_groups import TbVisitScreeningAdolRuleGroup
-
