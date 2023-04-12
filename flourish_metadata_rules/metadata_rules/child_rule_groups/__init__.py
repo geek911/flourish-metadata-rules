@@ -4,10 +4,6 @@ from .child_gad_anxiety_screening_rules import ChildGAD7AnxietyScreeningRuleGrou
 from .child_phq_depression_referral_rules import ChildPHQ9ReferralRuleGroup
 from .child_phq_depression_screening_rules import ChildPHQ9DeprScreeningRuleGroup
 from .child_visit_rules import ChildVisitRuleGroup
-from .child_visit_rules import ChildVisitRuleGroup
-from .requisition_rules import ChildVisitReqRuleGroup
-from .requisition_rules import ChildVisitReqRuleGroup
-from .requisition_rules import ChildVisitReqRuleGroup
 from .requisition_rules import ChildVisitReqRuleGroup
 from .socio_demographic_data_rules import ChildSocioDemographicRuleGroup
 from .tb_adolescent_rules import Covid19AdolRuleGroup, TbAdolEngagementRuleGroup, \
