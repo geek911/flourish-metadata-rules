@@ -46,8 +46,7 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.childphqdepressionscreening',
-                       f'{app_label}.childgadanxietyscreening',
-                       f'{app_label}.brief2selfreported', ])
+                       f'{app_label}.childgadanxietyscreening',])
 
     younger_than_36months = CrfRule(
         predicate=pc.func_36_months_younger,
