@@ -6,6 +6,7 @@ from ....predicates import ChildPredicates
 
 app_label = 'flourish_child'
 
+
 @register()
 class TbVisitScreeningAdolRuleGroup(CrfRuleGroup):
 
