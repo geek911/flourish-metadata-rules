@@ -420,3 +420,9 @@ class CaregiverPredicates(PredicateCollection):
             maternal_visit=visit)
 
         return visit.visit_code != '1000M' and self.prior_participation(visit=visit) and self.func_hiv_positive(visit=visit)
+
+    def func_enrolment_LWHIV(self, visit=None, **kwargs):
+        """Returns true if women LWHIV and enrolment visit i.e. (1000M or 2000M)
+        """
+        hiv_pos = self.func_hiv_positive(visit)
+        return visit.visit_code in ['1000M', '2000M'] and hiv_pos
