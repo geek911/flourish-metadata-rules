@@ -420,3 +420,16 @@ class CaregiverPredicates(PredicateCollection):
             maternal_visit=visit)
 
         return visit.visit_code != '1000M' and self.prior_participation(visit=visit) and self.func_hiv_positive(visit=visit)
+
+    def func_interview_focus_group_interest(self, visit=None, **kwargs):
+        interview_focus_group_interest_cls = django_apps.get_model(
+            'flourish_caregiver.interviewfocusgroupinterest')
+        try:
+            interview_focus_group_interest_cls.objects.get(
+                maternal_visit__subject_identifier=visit.subject_identifier,
+                maternal_visit__schedule_name__icontains='quart',
+            )
+        except interview_focus_group_interest_cls.DoesNotExist:
+            return False
+        else:
+            return True
