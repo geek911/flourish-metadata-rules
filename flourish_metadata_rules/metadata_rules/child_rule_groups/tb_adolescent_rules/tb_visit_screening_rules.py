@@ -12,7 +12,7 @@ class TbVisitScreeningAdolRuleGroup(CrfRuleGroup):
 
     tb_referral_rule = CrfRule(
         predicate=PF('cough_duration', 'fever_duration', 'night_sweats',
-                     'weight_loss', lambda cough, fever, sweats, weight_loss:
+                     'weight_loss', func=lambda cough, fever, sweats, weight_loss:
                      cough == YES or fever == True or sweats == True or weight_loss == True),
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
