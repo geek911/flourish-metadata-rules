@@ -34,7 +34,7 @@ class ChildVisitReqRuleGroup(RequisitionRuleGroup):
                        rectal_swab_panel])
 
     lithium_heparin_panel_rule = RequisitionRule(
-        predicate=pc.func_tb_lab_results_exist,
+        predicate=pc.func_lithium_heparin_collected,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_panels=[lithium_heparin_panel,])

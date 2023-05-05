@@ -416,28 +416,39 @@ class ChildPredicates(PredicateCollection):
         else:
             return tb_presence_obj.tb_referral == NO
 
-    def func_tb_lab_results_exist(self, visit, **kwargs):
-
+    def func_lithium_heparin_collected(self, visit, **kwargs):
+        """Checks if lithium heparin was collected during the
+        sheduled visit"""
         result = False
 
-        if visit.visit_code == '2100A' and visit.visit_code_sequence == 0:
-            # first visit, collect the sample, its mandetory
-            result = True
-
-        elif visit.visit_code == '2100A' and visit.visit_code_sequence == 1:
-            # if the visit is unsceduled, only trigger when the requisition was
+        if visit.visit_code_sequence == 1:
+            # if the visit is unsceduled, only trigger when requisition was
             # collected from the previous visit
             try:
                 requisition = self.child_requisition_cls.objects.get(
                     panel__name='lithium_heparin',
-                    child_visit__subject_identifier=visit.subject_identifier
+                    child_visit__subject_identifier=visit.subject_identifier,
+                    child_visit__visit_code='2100A',
+                    child_visit__visit_code_sequence='0'
                 )
             except self.child_requisition_cls.DoesNotExist:
                 pass
-            except self.child_requisition_cls.MultipleObjectsReturned:
-                pass
             else:
                 result = requisition.is_drawn == NO
+
+        else:
+            result = True
+
+        return result
+
+    def func_tb_lab_results_exist(self, visit, **kwargs):
+
+        result = False
+
+        if visit.visit_code_sequence == 0:
+            # first visit, collect the sample, its mandetory
+
+            result = True
         else:
             # facilitate the condition for lab results
             try:
