@@ -126,6 +126,13 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.childphqpostreferral'])
+    
+    adol_tb_results = CrfRule(
+        predicate=pc.func_tb_lab_results_exist,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.tblabresultsadol',]
+    )
 
     class Meta:
         app_label = app_label
