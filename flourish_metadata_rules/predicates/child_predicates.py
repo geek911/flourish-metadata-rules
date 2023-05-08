@@ -217,6 +217,12 @@ class ChildPredicates(PredicateCollection):
                 return consent_obj.specimen_consent == YES
             return False
 
+    def func_6_years_older(self, visit=None, **kwargs):
+        """Returns true if participant is 6 years or older
+        """
+        child_age = self.get_child_age(visit=visit)
+        return child_age.years >= 6 if child_age else False
+
     def func_7_years_older(self, visit=None, **kwargs):
         """Returns true if participant is 7 years or older
         """
