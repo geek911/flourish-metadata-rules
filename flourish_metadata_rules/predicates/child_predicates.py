@@ -3,7 +3,7 @@ from flourish_caregiver.helper_classes import MaternalStatusHelper
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
-from edc_constants.constants import FEMALE, YES, POS, NO
+from edc_constants.constants import FEMALE, YES, POS, NO, IND
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
 
@@ -21,6 +21,8 @@ class ChildPredicates(PredicateCollection):
 
     tb_visit_screening_model = f'{app_label}.tbvisitscreeningadolescent'
     tb_presence_model = f'{app_label}.tbpresencehouseholdmembersadol'
+    child_requisition_model = f'{app_label}.childrequisition'
+    tb_lab_results_model = f'{app_label}.tblabresultsadol'
 
     @property
     def tb_presence_model_cls(self):
@@ -29,6 +31,14 @@ class ChildPredicates(PredicateCollection):
     @property
     def maternal_visit_model_cls(self):
         return django_apps.get_model(self.maternal_visit_model)
+
+    @property
+    def child_requisition_cls(self):
+        return django_apps.get_model(self.child_requisition_model)
+
+    @property
+    def tb_lab_results_cls(self):
+        return django_apps.get_model(self.tb_lab_results_model)
 
     @property
     def tb_visit_screening_model_cls(self):
@@ -81,12 +91,11 @@ class ChildPredicates(PredicateCollection):
         return False
 
     def version_2_1(self, visit=None, **kwargs):
-
         """
         Returns true if the participant is enrolled under version 2.1 and is a delivery visit
         """
         caregiver_child_consent_cls = django_apps.get_model(
-                f'{self.maternal_app_label}.caregiverchildconsent')
+            f'{self.maternal_app_label}.caregiverchildconsent')
         try:
             caregiver_child_consent_cls.objects.get(
                 subject_identifier=visit.subject_identifier,
@@ -137,12 +146,14 @@ class ChildPredicates(PredicateCollection):
 
     def func_gad_post_referral_required(self, visit=None, **kwargs):
 
-        gad_referral_cls = django_apps.get_model(f'{self.app_label}.childgadreferral')
+        gad_referral_cls = django_apps.get_model(
+            f'{self.app_label}.childgadreferral')
         return self.requires_post_referral(gad_referral_cls, visit)
 
     def func_phq9_post_referral_required(self, visit=None, **kwargs):
 
-        phq9_referral_cls = django_apps.get_model(f'{self.app_label}.childphqreferral')
+        phq9_referral_cls = django_apps.get_model(
+            f'{self.app_label}.childphqreferral')
         return self.requires_post_referral(phq9_referral_cls, visit)
 
     def func_consent_study_pregnant(self, visit=None, **kwargs):
@@ -216,6 +227,12 @@ class ChildPredicates(PredicateCollection):
                 consent_obj = consent_objs.latest('consent_datetime')
                 return consent_obj.specimen_consent == YES
             return False
+
+    def func_6_years_older(self, visit=None, **kwargs):
+        """Returns true if participant is 6 years or older
+        """
+        child_age = self.get_child_age(visit=visit)
+        return child_age.years >= 6 if child_age else False
 
     def func_7_years_older(self, visit=None, **kwargs):
         """Returns true if participant is 7 years or older
@@ -404,3 +421,53 @@ class ChildPredicates(PredicateCollection):
             return False
         else:
             return tb_presence_obj.tb_referral == NO
+
+    def func_lithium_heparin_collected(self, visit, **kwargs):
+        """Checks if lithium heparin was collected during the
+        sheduled visit"""
+        result = False
+
+        if visit.visit_code_sequence >= 1:
+            # if the visit is unsceduled, only trigger when requisition was
+            # collected from the previous visit
+            try:
+                requisition = self.child_requisition_cls.objects.get(
+                    panel__name='lithium_heparin',
+                    child_visit__subject_identifier=visit.subject_identifier,
+                    child_visit__visit_code='2100A',
+                    child_visit__visit_code_sequence='0'
+                )
+            except self.child_requisition_cls.DoesNotExist:
+                pass
+            else:
+                result = requisition.is_drawn == NO
+
+        else:
+            result = True
+
+        return result
+
+    def func_tb_lab_results_exist(self, visit, **kwargs):
+
+        result = False
+
+        if visit.visit_code_sequence == 0:
+            # first visit, collect the sample, its mandetory
+
+            result = True
+        else:
+            # facilitate the condition for lab results
+            try:
+                result_obj = self.tb_lab_results_cls.objects.get(
+                    child_visit__subject_identifier=visit.subject_identifier,
+                    child_visit__visit_code='2100A',
+                    child_visit__visit_code_sequence='0')
+
+            except self.tb_lab_results_cls.DoesNotExist:
+                pass
+            else:
+                if visit.visit_code_sequence >= 1 \
+                        and result_obj.quantiferon_result in [IND, 'invalid']:
+                    result = True
+
+        return result

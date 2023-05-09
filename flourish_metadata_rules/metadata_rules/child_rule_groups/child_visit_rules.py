@@ -29,11 +29,21 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.infantarvexposure', ])
 
+    older_than_6 = CrfRule(
+        predicate=pc.func_6_years_older,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.childcbclsection1',
+                       f'{app_label}.childcbclsection2',
+                       f'{app_label}.childcbclsection3',
+                       f'{app_label}.childcbclsection4', ])
+
     older_than_7 = CrfRule(
         predicate=pc.func_7_years_older,
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
-        target_models=[f'{app_label}.childtannerstaging', ])
+        target_models=[f'{app_label}.childtannerstaging',
+                       f'{app_label}.childpenncnb', ])
 
     female_older_12 = CrfRule(
         predicate=pc.func_12_years_older_female,
@@ -126,6 +136,13 @@ class ChildVisitRuleGroup(CrfRuleGroup):
         consequence=REQUIRED,
         alternative=NOT_REQUIRED,
         target_models=[f'{app_label}.childphqpostreferral'])
+    
+    adol_tb_results = CrfRule(
+        predicate=pc.func_tb_lab_results_exist,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.tblabresultsadol',]
+    )
 
     class Meta:
         app_label = app_label
