@@ -427,7 +427,7 @@ class ChildPredicates(PredicateCollection):
         sheduled visit"""
         result = False
 
-        if visit.visit_code_sequence >= 1:
+        if visit.visit_code == '2100A' and visit.visit_code_sequence >= 1:
             # if the visit is unsceduled, only trigger when requisition was
             # collected from the previous visit
             try:
@@ -442,20 +442,15 @@ class ChildPredicates(PredicateCollection):
             else:
                 result = requisition.is_drawn == NO
 
-        else:
             result = True
 
-        return result
+        return result or self.func_tb_lab_results_exist(visit, **kwargs)
 
     def func_tb_lab_results_exist(self, visit, **kwargs):
 
         result = False
 
-        if visit.visit_code_sequence == 0:
-            # first visit, collect the sample, its mandetory
-
-            result = True
-        else:
+        if visit.visit_code == '2100A' and visit.visit_code_sequence >= 1:
             # facilitate the condition for lab results
             try:
                 result_obj = self.tb_lab_results_cls.objects.get(
@@ -466,8 +461,11 @@ class ChildPredicates(PredicateCollection):
             except self.tb_lab_results_cls.DoesNotExist:
                 pass
             else:
-                if visit.visit_code_sequence >= 1 \
-                        and result_obj.quantiferon_result in [IND, 'invalid']:
+                if result_obj.quantiferon_result in [IND, 'invalid']:
                     result = True
+
+        elif visit.visit_code == '2100A' and visit.visit_code_sequence == 0:
+            # first visit, collect the sample, its mandetory
+            result = True
 
         return result
