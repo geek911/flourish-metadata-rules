@@ -435,8 +435,9 @@ class ChildPredicates(PredicateCollection):
                 pass
             else:
                 result = requisition.is_drawn == NO
-
+        elif visit.visit_code == '2100A' and visit.visit_code_sequence == 0:
             result = True
+
 
         return result or self.func_tb_lab_results_exist(visit, **kwargs)
 
