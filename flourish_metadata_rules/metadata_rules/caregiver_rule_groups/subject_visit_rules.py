@@ -120,6 +120,13 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         target_models=[f'{app_label}.maternalarvpostadherence']
     )
 
+    enrol_lwhiv = CrfRule(
+        predicate=pc.func_enrolment_LWHIV,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.maternalarvadherence']
+    )
+
     class Meta:
         app_label = app_label
         source_model = f'{app_label}.maternalvisit'
