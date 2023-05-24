@@ -1,5 +1,5 @@
 from flourish_caregiver.helper_classes import MaternalStatusHelper
-
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
@@ -23,6 +23,8 @@ class ChildPredicates(PredicateCollection):
     tb_presence_model = f'{app_label}.tbpresencehouseholdmembersadol'
     child_requisition_model = f'{app_label}.childrequisition'
     tb_lab_results_model = f'{app_label}.tblabresultsadol'
+    infant_feeding_model = f'{app_label}.infantfeeding'
+    infant_hiv_test_model = f'{app_label}.infanthivtesting'
 
     @property
     def tb_presence_model_cls(self):
@@ -43,6 +45,14 @@ class ChildPredicates(PredicateCollection):
     @property
     def tb_visit_screening_model_cls(self):
         return django_apps.get_model(self.tb_visit_screening_model)
+
+    @property
+    def infant_feeding_model_cls(self):
+        return django_apps.get_model(self.infant_feeding_model)
+
+    @property
+    def infant_hiv_test_model_cls(self):
+        return django_apps.get_model(self.infant_hiv_test_model)
 
     def func_hiv_exposed(self, visit=None, **kwargs):
         """
@@ -390,7 +400,6 @@ class ChildPredicates(PredicateCollection):
                 years=3, months=0)
 
             if visit.report_datetime.date() >= child_is_three_at_date:
-
                 return int(visit.visit_code[:4]) % 4 == 0
 
         return False
@@ -444,7 +453,6 @@ class ChildPredicates(PredicateCollection):
         elif visit.visit_code == '2100A' and visit.visit_code_sequence == 0:
             result = True
 
-
         return result or self.func_tb_lab_results_exist(visit, **kwargs)
 
     def func_tb_lab_results_exist(self, visit, **kwargs):
@@ -470,3 +478,56 @@ class ChildPredicates(PredicateCollection):
             result = True
 
         return result
+
+    def newly_enrolled(self, visit=None, **kwargs):
+        """Returns true if newly enrolled
+        """
+        enrollment_model = django_apps.get_model(
+            f'{self.maternal_app_label}.antenatalenrollment')
+        try:
+            enrollment_model.objects.get(
+                subject_identifier=visit.subject_identifier[:-3])
+        except enrollment_model.DoesNotExist:
+            return False
+        else:
+            return True
+
+    def func_hiv_infant_testing(self, visit=None, **kwargs):
+        """Returns true if the visit is 2001, 2002, 2003 and the caregiver
+         is newly enrolled women living with HIV
+        """
+        child_subject_identifier = visit.subject_identifier
+        caregiver_subject_identifier = child_subject_identifier[:-3]
+        maternal_status_helper = MaternalStatusHelper(subject_identifier=caregiver_subject_identifier)
+
+        # Get infant feeding CRF
+        infant_feeding_crf = self.infant_feeding_model_cls.objects.filter(
+            child_visit__subject_identifier=child_subject_identifier,
+            child_visit__visit_code=visit.visit_code).first()
+
+        # Validate visit and caregiver
+        valid_visit_and_caregiver = (
+                maternal_status_helper.hiv_status == POS
+                and self.newly_enrolled(visit=visit)
+                and visit.visit_code in [
+                    '2001', '2002', '2003'])
+
+        # Initialize valid_infant_eligibility as False
+        valid_infant_eligibility = False
+
+        # Validate infant eligibility
+        if infant_feeding_crf:
+            hiv_test = None
+            if infant_feeding_crf.dt_weaned:
+                hiv_test = self.infant_hiv_test_model_cls.objects.filter(
+                    child_visit__subject_identifier=child_subject_identifier,
+                    test_date__gte=infant_feeding_crf.dt_weaned + timedelta(weeks=6)
+                ).first()
+
+            valid_infant_eligibility = (
+                    infant_feeding_crf.continuing_to_bf == YES
+                    or (infant_feeding_crf.continuing_to_bf == NO and hiv_test)
+            )
+
+        return valid_visit_and_caregiver or valid_infant_eligibility
+
