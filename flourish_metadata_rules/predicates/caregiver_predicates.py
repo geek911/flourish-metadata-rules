@@ -4,7 +4,7 @@ from flourish_caregiver.helper_classes import MaternalStatusHelper
 from dateutil import relativedelta
 from django.apps import apps as django_apps
 from edc_base.utils import age, get_utcnow
-from edc_constants.constants import POS, YES, NEG
+from edc_constants.constants import POS, YES, NEG, IND
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
 
@@ -275,6 +275,14 @@ class CaregiverPredicates(PredicateCollection):
         return len(values) == 0 and self.child_gt10_eligible(visit,
                                                              maternal_status_helper,
                                                              ['-36', ])
+    
+    def func_post_hiv_rapid_test(self, visit, **kwargs):
+        maternal_helper = MaternalStatusHelper(maternal_visit=visit)
+
+        if maternal_helper.hiv_status in [NEG, IND]:
+            return True
+        else:
+            return False
 
     def func_show_hiv_test_form(
             self, visit=None, maternal_status_helper=None, **kwargs

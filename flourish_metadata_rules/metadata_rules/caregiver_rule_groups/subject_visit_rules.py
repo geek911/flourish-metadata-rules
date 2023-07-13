@@ -77,6 +77,12 @@ class MaternalVisitRuleGroup(CrfRuleGroup):
         target_models=[f'{app_label}.hivrapidtestcounseling', 
                        f'{app_label}.posthivrapidtestandconseling'])
     
+    post_hiv_test = CrfRule(
+        predicate=pc.func_post_hiv_rapid_test,
+        consequence=REQUIRED,
+        alternative=NOT_REQUIRED,
+        target_models=[f'{app_label}.posthivrapidtestandconseling'])
+    
     tb_eligible = CrfRule(
         predicate=pc.func_tb_eligible,
         consequence=REQUIRED,
