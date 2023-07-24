@@ -3,10 +3,13 @@ from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
+from django.db.models import Q
 from edc_base.utils import age, get_utcnow
-from edc_constants.constants import FEMALE, YES, POS, NO, IND
+from edc_constants.constants import FEMALE, IND, NO, POS, YES
 from edc_metadata_rules import PredicateCollection
 from edc_reference.models import Reference
+
+from flourish_caregiver.helper_classes import MaternalStatusHelper
 
 
 class UrlMixinNoReverseMatch(Exception):
@@ -51,6 +54,14 @@ class ChildPredicates(PredicateCollection):
     @property
     def tb_visit_screening_model_cls(self):
         return django_apps.get_model(self.tb_visit_screening_model)
+
+    @property
+    def infant_feeding_model_cls(self):
+        return django_apps.get_model(self.infant_feeding_model)
+
+    @property
+    def infant_hiv_test_model_cls(self):
+        return django_apps.get_model(self.infant_hiv_test_model)
 
     def func_hiv_exposed(self, visit=None, **kwargs):
         """
@@ -100,18 +111,16 @@ class ChildPredicates(PredicateCollection):
 
     def version_2_1(self, visit=None, **kwargs):
         """
-        Returns true if the participant is enrolled under version 2.1 and is a delivery visit
+        Returns true if the participant is enrolled under version 2.1 and is a delivery
+        visit
         """
         caregiver_child_consent_cls = django_apps.get_model(
             f'{self.maternal_app_label}.caregiverchildconsent')
-        try:
-            caregiver_child_consent_cls.objects.get(
-                subject_identifier=visit.subject_identifier,
-                version='2.1')
-        except caregiver_child_consent_cls.DoesNotExist:
-            return False
-        else:
-            return visit.visit_code == '2000D' and visit.visit_code_sequence == 0
+        consent_objs = caregiver_child_consent_cls.objects.filter(
+            subject_identifier=visit.subject_identifier, ).exclude(
+            Q(version='1') | Q(version='2'))
+        return visit.visit_code == '2000D' and visit.visit_code_sequence == 0 and \
+            consent_objs.exists()
 
     def get_child_age(self, visit=None, **kwargs):
         """Returns child age
@@ -253,6 +262,12 @@ class ChildPredicates(PredicateCollection):
         """
         child_age = self.get_child_age(visit=visit)
         return child_age.years >= 12 if child_age else False
+
+    def func_11_years_older(self, visit=None, **kwargs):
+        """Returns true if participant is 11 years or older
+        """
+        child_age = self.get_child_age(visit=visit)
+        return child_age.years >= 11 if child_age else False
 
     def func_12_years_older_female(self, visit=None, **kwargs):
         """Returns true if participant is 12 years or older
@@ -398,7 +413,6 @@ class ChildPredicates(PredicateCollection):
                 years=3, months=0)
 
             if visit.report_datetime.date() >= child_is_three_at_date:
-
                 return int(visit.visit_code[:4]) % 4 == 0
 
         return False
@@ -517,15 +531,13 @@ class ChildPredicates(PredicateCollection):
         if infant_feeding_crf and infant_feeding_crf.dt_weaned:
             hiv_test_6wks_post_wean = self.infant_hiv_test_model_cls.objects.filter(
                 child_visit__subject_identifier=child_subject_identifier,
-                received_date__gte=infant_feeding_crf.dt_weaned +
-                timedelta(weeks=6)
+                received_date__gte=infant_feeding_crf.dt_weaned + timedelta(weeks=6)
             ).exists()
 
-        hiv_status = self.get_latest_maternal_hiv_status(
-            visit=visit).hiv_status
+        hiv_status = self.get_latest_maternal_hiv_status(visit=visit).hiv_status
         if hiv_status == POS:
             if (self.newly_enrolled(visit=visit)
-                    and visit.visit_code in ['2001', '2003']):
+                and visit.visit_code in ['2001', '2003']):
                 return True
 
             if visit.visit_code == '2002':
